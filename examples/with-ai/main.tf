@@ -42,7 +42,7 @@ module "chatops" {
 
 # Optional AI Output Processor module
 module "ai_processor" {
-  source = "../../modules-optional/ai-output-processor"
+  source = "../../modules/core/ai-output-processor"
 
   function_name        = "${var.name_prefix}-ai-processor"
   api_gateway_name     = "${var.name_prefix}-ai-processor-api"

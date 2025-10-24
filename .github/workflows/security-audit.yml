@@ -40,13 +40,12 @@ jobs:
         with:
           working_directory: .
           soft_fail: true
-          format: sarif
 
       - name: Upload TFSec results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: tfsec.sarif
+          sarif_file: results.sarif
 
   checkov:
     name: Checkov Security Scan

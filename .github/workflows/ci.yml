@@ -34,9 +34,9 @@ jobs:
           - .
           - modules/core/secrets
           - modules/core/webhook-handler
+          - modules/core/ai-output-processor
           - modules/cicd/github
           - modules/chat/telegram
-          - modules-optional/ai-output-processor
           - examples/basic
           - examples/with-ai
 
