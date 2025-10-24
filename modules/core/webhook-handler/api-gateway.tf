@@ -119,6 +119,7 @@ resource "aws_api_gateway_deployment" "webhook_deployment" {
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   name              = "/aws/apigateway/${var.api_gateway_name}"
   retention_in_days = var.log_retention_days
+  kms_key_id        = aws_kms_key.lambda_env_key.arn
 
   tags = var.tags
 }

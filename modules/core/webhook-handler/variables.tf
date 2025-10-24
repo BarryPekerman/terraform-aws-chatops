@@ -48,7 +48,7 @@ variable "stage_name" {
 variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
-  default     = 7
+  default     = 365
 }
 
 variable "enable_xray_tracing" {
