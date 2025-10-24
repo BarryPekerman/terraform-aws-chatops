@@ -17,64 +17,64 @@
 
 # Target module - root
 !target-module
-!target-module/main.tf
-!target-module/variables.tf
-!target-module/outputs.tf
-!target-module/versions.tf
-!target-module/terraform.tfvars.example
+!main.tf
+!variables.tf
+!outputs.tf
+!versions.tf
+!terraform.tfvars.example
 
 # Target module - examples/basic
-!target-module/examples
-!target-module/examples/basic
-!target-module/examples/basic/main.tf
-!target-module/examples/basic/outputs.tf
-!target-module/examples/basic/variables.tf
-!target-module/examples/basic/terraform.tfvars.example
+!examples
+!examples/basic
+!examples/basic/main.tf
+!examples/basic/outputs.tf
+!examples/basic/variables.tf
+!examples/basic/terraform.tfvars.example
 
 # Target module - examples/with-ai
-!target-module/examples/with-ai
-!target-module/examples/with-ai/main.tf
-!target-module/examples/with-ai/outputs.tf
-!target-module/examples/with-ai/variables.tf
-!target-module/examples/with-ai/terraform.tfvars.example
+!examples/with-ai
+!examples/with-ai/main.tf
+!examples/with-ai/outputs.tf
+!examples/with-ai/variables.tf
+!examples/with-ai/terraform.tfvars.example
 
 # Target module - modules/chat/telegram
-!target-module/modules
-!target-module/modules/chat
-!target-module/modules/chat/telegram
-!target-module/modules/chat/telegram/bot.tf
-!target-module/modules/chat/telegram/iam.tf
-!target-module/modules/chat/telegram/outputs.tf
-!target-module/modules/chat/telegram/variables.tf
+!modules
+!modules/chat
+!modules/chat/telegram
+!modules/chat/telegram/bot.tf
+!modules/chat/telegram/iam.tf
+!modules/chat/telegram/outputs.tf
+!modules/chat/telegram/variables.tf
 
 # Target module - modules/cicd/github
-!target-module/modules/cicd
-!target-module/modules/cicd/github
-!target-module/modules/cicd/github/iam.tf
-!target-module/modules/cicd/github/oidc.tf
-!target-module/modules/cicd/github/outputs.tf
-!target-module/modules/cicd/github/variables.tf
+!modules/cicd
+!modules/cicd/github
+!modules/cicd/github/iam.tf
+!modules/cicd/github/oidc.tf
+!modules/cicd/github/outputs.tf
+!modules/cicd/github/variables.tf
 
 # Target module - modules/core/secrets
-!target-module/modules/core
-!target-module/modules/core/secrets
-!target-module/modules/core/secrets/main.tf
-!target-module/modules/core/secrets/outputs.tf
-!target-module/modules/core/secrets/variables.tf
+!modules/core
+!modules/core/secrets
+!modules/core/secrets/main.tf
+!modules/core/secrets/outputs.tf
+!modules/core/secrets/variables.tf
 
 # Target module - modules/core/webhook-handler
-!target-module/modules/core/webhook-handler
-!target-module/modules/core/webhook-handler/api-gateway.tf
-!target-module/modules/core/webhook-handler/iam.tf
-!target-module/modules/core/webhook-handler/lambda.tf
-!target-module/modules/core/webhook-handler/outputs.tf
-!target-module/modules/core/webhook-handler/variables.tf
+!modules/core/webhook-handler
+!modules/core/webhook-handler/api-gateway.tf
+!modules/core/webhook-handler/iam.tf
+!modules/core/webhook-handler/lambda.tf
+!modules/core/webhook-handler/outputs.tf
+!modules/core/webhook-handler/variables.tf
 
 # Target module - modules-optional/ai-output-processor
-!target-module/modules-optional
-!target-module/modules-optional/ai-output-processor
-!target-module/modules-optional/ai-output-processor/api-gateway.tf
-!target-module/modules-optional/ai-output-processor/iam.tf
-!target-module/modules-optional/ai-output-processor/outputs.tf
-!target-module/modules-optional/ai-output-processor/processor.tf
-!target-module/modules-optional/ai-output-processor/variables.tf
+!modules-optional
+!modules-optional/ai-output-processor
+!modules-optional/ai-output-processor/api-gateway.tf
+!modules-optional/ai-output-processor/iam.tf
+!modules-optional/ai-output-processor/outputs.tf
+!modules-optional/ai-output-processor/processor.tf
+!modules-optional/ai-output-processor/variables.tf
