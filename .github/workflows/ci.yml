@@ -1,0 +1,78 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'target-module/**/*.tf'
+      - 'target-module/**/*.tfvars'
+      - 'target-module/.pre-commit-config.yaml'
+      - '.github/workflows/ci.yml'
+    paths-ignore:
+      - 'target-module/**/*.md'
+      - '*.md'
+      - 'docs/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'target-module/**/*.tf'
+      - 'target-module/**/*.tfvars'
+      - 'target-module/.pre-commit-config.yaml'
+      - '.github/workflows/ci.yml'
+    paths-ignore:
+      - 'target-module/**/*.md'
+      - '*.md'
+      - 'docs/**'
+
+env:
+  TF_VERSION: "1.6.0"
+  TFLINT_VERSION: "0.48.0"
+  TFSEC_VERSION: "1.28.1"
+  CHECKOV_VERSION: "3.0.0"
+
+jobs:
+  # Terraform validation (runs on all modules)
+  terraform-validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        working-directory:
+          - target-module
+          - target-module/modules/core/secrets
+          - target-module/modules/core/webhook-handler
+          - target-module/modules/cicd/github
+          - target-module/modules/chat/telegram
+          - target-module/modules-optional/ai-output-processor
+          - target-module/examples/basic
+          - target-module/examples/with-ai
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+        working-directory: ${{ matrix.working-directory }}
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+        working-directory: ${{ matrix.working-directory }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ matrix.working-directory }}
+
+      - name: Setup TFLint
+        run: |
+          wget -O tflint.zip https://github.com/terraform-linters/tflint/releases/download/v${{ env.TFLINT_VERSION }}/tflint_linux_amd64.zip
+          unzip tflint.zip
+          sudo mv tflint /usr/local/bin/
+
+      - name: Run TFLint
+        run: tflint --init && tflint
+        working-directory: ${{ matrix.working-directory }}
