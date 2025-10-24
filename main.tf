@@ -26,17 +26,17 @@ module "core_webhook" {
   secrets_manager_arn = module.core_secrets.secret_arn
   max_message_length  = var.max_message_length
 
-  stage_name           = var.api_gateway_stage
-  log_retention_days   = var.log_retention_days
-  enable_xray_tracing  = var.enable_xray_tracing
+  stage_name            = var.api_gateway_stage
+  log_retention_days    = var.log_retention_days
+  enable_xray_tracing   = var.enable_xray_tracing
   enable_kms_encryption = true
-  enable_dlq           = true
-  rate_limit           = var.rate_limit
-  burst_limit          = var.burst_limit
-  quota_limit          = var.quota_limit
-  quota_period         = var.quota_period
-  api_key_required     = var.webhook_api_key_required
-  additional_env_vars  = var.webhook_additional_env_vars
+  enable_dlq            = true
+  rate_limit            = var.rate_limit
+  burst_limit           = var.burst_limit
+  quota_limit           = var.quota_limit
+  quota_period          = var.quota_period
+  api_key_required      = var.webhook_api_key_required
+  additional_env_vars   = var.webhook_additional_env_vars
 
   tags = var.tags
 
