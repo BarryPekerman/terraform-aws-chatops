@@ -9,9 +9,6 @@ on:
       - 'modules/**/*.tf'
       - 'examples/**/*.tf'
       - '.github/workflows/security-audit.yml'
-    paths-ignore:
-      - '*.md'
-      - 'docs/**'
   pull_request:
     branches: [ main, develop ]
     paths:
@@ -20,9 +17,6 @@ on:
       - 'modules/**/*.tf'
       - 'examples/**/*.tf'
       - '.github/workflows/security-audit.yml'
-    paths-ignore:
-      - '*.md'
-      - 'docs/**'
   schedule:
     # Run security audit weekly on Monday at 9 AM UTC
     - cron: '0 9 * * 1'

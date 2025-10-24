@@ -9,9 +9,6 @@ on:
       - 'modules/**/*.tf'
       - 'examples/**/*.tf'
       - '.github/workflows/ci.yml'
-    paths-ignore:
-      - '*.md'
-      - 'docs/**'
   pull_request:
     branches: [ main, develop ]
     paths:
@@ -20,9 +17,6 @@ on:
       - 'modules/**/*.tf'
       - 'examples/**/*.tf'
       - '.github/workflows/ci.yml'
-    paths-ignore:
-      - '*.md'
-      - 'docs/**'
 
 env:
   TF_VERSION: "1.6.0"
