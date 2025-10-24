@@ -1,0 +1,22 @@
+# ChatOps Terraform Module - Example Variables
+# Copy this file to terraform.tfvars and update with your values
+
+# GitHub Configuration
+github_owner = "your-github-org"
+github_repo  = "your-github-repo"
+github_token = "your-github-token"
+
+# Telegram Configuration
+telegram_bot_token = "your-telegram-bot-token"
+
+# AWS Configuration
+s3_bucket_arn = "arn:aws:s3:::your-terraform-state-bucket"
+
+# Optional: Override defaults
+name_prefix = "chatops"
+tags = {
+  Environment = "production"
+  Project     = "chatops"
+  Owner       = "devops-team"
+}
+

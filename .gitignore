@@ -21,7 +21,6 @@
 !target-module/variables.tf
 !target-module/outputs.tf
 !target-module/versions.tf
-!target-module/README.md
 !target-module/terraform.tfvars.example
 
 # Target module - examples/basic
