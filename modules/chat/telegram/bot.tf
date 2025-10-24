@@ -14,10 +14,31 @@ terraform {
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+# KMS key for Lambda environment variable encryption
+resource "aws_kms_key" "lambda_env_key" {
+  description             = "KMS key for ${var.function_name} environment variables"
+  deletion_window_in_days = 7
+
+  tags = var.tags
+}
+
+resource "aws_kms_alias" "lambda_env_key_alias" {
+  name          = "alias/${var.function_name}-env"
+  target_key_id = aws_kms_key.lambda_env_key.key_id
+}
+
+# SQS Dead Letter Queue for failed Lambda invocations
+resource "aws_sqs_queue" "lambda_dlq" {
+  name = "${var.function_name}-dlq"
+
+  tags = var.tags
+}
+
 # CloudWatch log group for bot
 resource "aws_cloudwatch_log_group" "bot_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
+  kms_key_id        = aws_kms_key.lambda_env_key.arn
 
   tags = var.tags
 }
@@ -32,6 +53,8 @@ resource "aws_lambda_function" "telegram_bot" {
 
   role = aws_iam_role.bot_role.arn
 
+  kms_key_arn = aws_kms_key.lambda_env_key.arn
+
   environment {
     variables = merge(
       {
@@ -40,6 +63,14 @@ resource "aws_lambda_function" "telegram_bot" {
       },
       var.additional_env_vars
     )
+  }
+
+  dead_letter_config {
+    target_arn = aws_sqs_queue.lambda_dlq.arn
+  }
+
+  tracing_config {
+    mode = "Active"
   }
 
   timeout     = 30

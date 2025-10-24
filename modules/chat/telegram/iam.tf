@@ -2,18 +2,7 @@
 resource "aws_iam_role" "bot_role" {
   name = "${var.function_name}-role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
+  assume_role_policy = file("${path.module}/policies/assume-role-policy.json")
 
   tags = var.tags
 }
@@ -22,26 +11,12 @@ resource "aws_iam_role" "bot_role" {
 resource "aws_iam_policy" "bot_policy" {
   name = "${var.function_name}-policy"
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents"
-        ]
-        Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*:*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "secretsmanager:GetSecretValue"
-        ]
-        Resource = var.secrets_manager_arn
-      }
-    ]
+  policy = templatefile("${path.module}/policies/lambda-policy.json.tpl", {
+    region              = data.aws_region.current.id
+    account_id          = data.aws_caller_identity.current.account_id
+    secrets_manager_arn = var.secrets_manager_arn
+    kms_key_arn         = aws_kms_key.lambda_env_key.arn
+    dlq_arn             = aws_sqs_queue.lambda_dlq.arn
   })
 
   tags = var.tags

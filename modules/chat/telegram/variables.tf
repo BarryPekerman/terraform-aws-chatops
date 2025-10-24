@@ -26,7 +26,7 @@ variable "secrets_manager_arn" {
 variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
-  default     = 7
+  default     = 365
 }
 
 variable "additional_env_vars" {
