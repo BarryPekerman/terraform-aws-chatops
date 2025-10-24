@@ -3,7 +3,7 @@
 A production-ready Terraform module for building ChatOps workflows on AWS. This module enables you to manage infrastructure through Telegram with secure GitHub Actions integration.
 
 ## Architecture
-
+ 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                         ChatOps v1.0                            │
