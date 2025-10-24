@@ -1,22 +1,35 @@
-# ChatOps Terraform Module - Example Variables
-# Copy this file to terraform.tfvars and update with your values
+# ChatOps Terraform Module Configuration
+# Copy this file to terraform.tfvars and fill in your values
+
+# Basic Configuration
+name_prefix = "my-chatops"
+aws_region  = "us-east-1"
 
 # GitHub Configuration
-github_owner = "your-github-org"
-github_repo  = "your-github-repo"
-github_token = "your-github-token"
+github_owner = "your-github-username"
+github_repo  = "your-repository-name"
+github_branch = "main"
+github_token = "ghp_your_github_personal_access_token"
 
 # Telegram Configuration
-telegram_bot_token = "your-telegram-bot-token"
+telegram_bot_token = "1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
+authorized_chat_id = "123456789"
 
-# AWS Configuration
+# S3 Configuration (for Terraform state)
 s3_bucket_arn = "arn:aws:s3:::your-terraform-state-bucket"
 
-# Optional: Override defaults
-name_prefix = "chatops"
+# Lambda ZIP Paths (created by setup.sh)
+webhook_lambda_zip_path = "../lambda-zips/webhook-handler.zip"
+telegram_lambda_zip_path = "../lambda-zips/telegram-bot.zip"
+
+# Optional Configuration
+max_message_length = 3500
+log_retention_days = 7
+api_gateway_stage = "prod"
+
+# Tags
 tags = {
   Environment = "production"
   Project     = "chatops"
-  Owner       = "devops-team"
+  ManagedBy   = "terraform"
 }
-
