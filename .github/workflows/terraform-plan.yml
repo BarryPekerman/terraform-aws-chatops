@@ -4,8 +4,10 @@ on:
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'target-module/**/*.tf'
-      - 'target-module/**/*.tfvars'
+      - '*.tf'
+      - '*.tfvars'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
       - '.github/workflows/terraform-plan.yml'
 
 env:
@@ -19,9 +21,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            target-module
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -30,7 +29,7 @@ jobs:
 
       - name: Create test tfvars
         run: |
-          cd target-module/examples/basic
+          cd examples/basic
           cat > terraform.tfvars << EOF
           aws_region         = "us-east-1"
           name_prefix        = "test-chatops"
@@ -46,20 +45,20 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd target-module/examples/basic
+          cd examples/basic
           terraform init -backend=false
 
       - name: Terraform Plan
         id: plan
         run: |
-          cd target-module/examples/basic
+          cd examples/basic
           terraform plan -out=tfplan -no-color
         continue-on-error: true
 
       - name: Save plan output
         if: always()
         run: |
-          cd target-module/examples/basic
+          cd examples/basic
           terraform show -no-color tfplan > plan-output.txt
 
       - name: Comment PR with plan
@@ -69,7 +68,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const plan = fs.readFileSync('target-module/examples/basic/plan-output.txt', 'utf8');
+            const plan = fs.readFileSync('examples/basic/plan-output.txt', 'utf8');
             const output = `## Terraform Plan - Basic Example
             
             \`\`\`terraform
@@ -90,7 +89,7 @@ jobs:
         if: always()
         with:
           name: basic-plan
-          path: target-module/examples/basic/tfplan
+          path: examples/basic/tfplan
           retention-days: 5
 
   plan-with-ai:
@@ -108,7 +107,7 @@ jobs:
 
       - name: Create test tfvars
         run: |
-          cd target-module/examples/with-ai
+          cd examples/with-ai
           cat > terraform.tfvars << EOF
           aws_region         = "us-east-1"
           name_prefix        = "test-chatops"
@@ -127,20 +126,20 @@ jobs:
 
       - name: Terraform Init
         run: |
-          cd target-module/examples/with-ai
+          cd examples/with-ai
           terraform init -backend=false
 
       - name: Terraform Plan
         id: plan
         run: |
-          cd target-module/examples/with-ai
+          cd examples/with-ai
           terraform plan -out=tfplan -no-color
         continue-on-error: true
 
       - name: Save plan output
         if: always()
         run: |
-          cd target-module/examples/with-ai
+          cd examples/with-ai
           terraform show -no-color tfplan > plan-output.txt
 
       - name: Comment PR with plan
@@ -150,7 +149,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const plan = fs.readFileSync('target-module/examples/with-ai/plan-output.txt', 'utf8');
+            const plan = fs.readFileSync('examples/with-ai/plan-output.txt', 'utf8');
             const output = `## Terraform Plan - With-AI Example
             
             \`\`\`terraform
@@ -171,7 +170,7 @@ jobs:
         if: always()
         with:
           name: with-ai-plan
-          path: target-module/examples/with-ai/tfplan
+          path: examples/with-ai/tfplan
           retention-days: 5
 
   plan-summary:

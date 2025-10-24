@@ -4,19 +4,25 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'target-module/**/*.tf'
-      - 'target-module/**/*.tfvars'
+      - '*.tf'
+      - '*.tfvars'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
       - '.github/workflows/security-audit.yml'
     paths-ignore:
-      - '**/*.md'
+      - '*.md'
+      - 'docs/**'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'target-module/**/*.tf'
-      - 'target-module/**/*.tfvars'
+      - '*.tf'
+      - '*.tfvars'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
       - '.github/workflows/security-audit.yml'
     paths-ignore:
-      - '**/*.md'
+      - '*.md'
+      - 'docs/**'
   schedule:
     # Run security audit weekly on Monday at 9 AM UTC
     - cron: '0 9 * * 1'
@@ -33,7 +39,7 @@ jobs:
       - name: Run TFSec
         uses: aquasecurity/tfsec-action@v1.0.3
         with:
-          working_directory: target-module
+          working_directory: .
           soft_fail: true
           format: sarif
           output: tfsec.sarif
@@ -55,7 +61,7 @@ jobs:
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: target-module
+          directory: .
           framework: terraform
           soft_fail: true
           output_format: sarif
@@ -79,7 +85,7 @@ jobs:
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'config'
-          scan-ref: 'target-module'
+          scan-ref: '.'
           format: 'sarif'
           output: 'trivy.sarif'
           severity: 'CRITICAL,HIGH'
@@ -117,8 +123,8 @@ jobs:
           
       - name: Check for new secrets
         run: |
-          if [ -f "target-module/.secrets.baseline" ]; then
-            detect-secrets audit --diff .secrets.new target-module/.secrets.baseline || \
+          if [ -f ".secrets.baseline" ]; then
+            detect-secrets audit --diff .secrets.new .secrets.baseline || \
             echo "⚠️ New potential secrets detected. Review the scan results."
           else
             echo "ℹ️ No baseline found. Creating new baseline."
@@ -139,7 +145,6 @@ jobs:
 
       - name: Check for outdated providers
         run: |
-          cd target-module
           terraform init -backend=false
           terraform version
           terraform providers

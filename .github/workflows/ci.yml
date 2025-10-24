@@ -4,23 +4,23 @@ on:
   push:
     branches: [ main, develop ]
     paths:
-      - 'target-module/**/*.tf'
-      - 'target-module/**/*.tfvars'
-      - 'target-module/.pre-commit-config.yaml'
+      - '*.tf'
+      - '*.tfvars'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
       - '.github/workflows/ci.yml'
     paths-ignore:
-      - 'target-module/**/*.md'
       - '*.md'
       - 'docs/**'
   pull_request:
     branches: [ main, develop ]
     paths:
-      - 'target-module/**/*.tf'
-      - 'target-module/**/*.tfvars'
-      - 'target-module/.pre-commit-config.yaml'
+      - '*.tf'
+      - '*.tfvars'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
       - '.github/workflows/ci.yml'
     paths-ignore:
-      - 'target-module/**/*.md'
       - '*.md'
       - 'docs/**'
 
@@ -37,14 +37,14 @@ jobs:
     strategy:
       matrix:
         working-directory:
-          - target-module
-          - target-module/modules/core/secrets
-          - target-module/modules/core/webhook-handler
-          - target-module/modules/cicd/github
-          - target-module/modules/chat/telegram
-          - target-module/modules-optional/ai-output-processor
-          - target-module/examples/basic
-          - target-module/examples/with-ai
+          - .
+          - modules/core/secrets
+          - modules/core/webhook-handler
+          - modules/cicd/github
+          - modules/chat/telegram
+          - modules-optional/ai-output-processor
+          - examples/basic
+          - examples/with-ai
 
     steps:
       - name: Checkout code
