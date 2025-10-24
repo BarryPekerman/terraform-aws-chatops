@@ -8,6 +8,13 @@
 !LICENSE
 !README.md
 
+# Root Terraform files
+!main.tf
+!variables.tf
+!outputs.tf
+!versions.tf
+!terraform.tfvars.example
+
 # GitHub workflows
 !.github
 !.github/workflows
@@ -15,15 +22,7 @@
 !.github/workflows/security-audit.yml
 !.github/workflows/terraform-plan.yml
 
-# Target module - root
-!target-module
-!main.tf
-!variables.tf
-!outputs.tf
-!versions.tf
-!terraform.tfvars.example
-
-# Target module - examples/basic
+# Examples - basic
 !examples
 !examples/basic
 !examples/basic/main.tf
@@ -31,14 +30,14 @@
 !examples/basic/variables.tf
 !examples/basic/terraform.tfvars.example
 
-# Target module - examples/with-ai
+# Examples - with-ai
 !examples/with-ai
 !examples/with-ai/main.tf
 !examples/with-ai/outputs.tf
 !examples/with-ai/variables.tf
 !examples/with-ai/terraform.tfvars.example
 
-# Target module - modules/chat/telegram
+# Modules - chat/telegram
 !modules
 !modules/chat
 !modules/chat/telegram
@@ -46,8 +45,11 @@
 !modules/chat/telegram/iam.tf
 !modules/chat/telegram/outputs.tf
 !modules/chat/telegram/variables.tf
+!modules/chat/telegram/policies
+!modules/chat/telegram/policies/assume-role-policy.json
+!modules/chat/telegram/policies/lambda-policy.json.tpl
 
-# Target module - modules/cicd/github
+# Modules - cicd/github
 !modules/cicd
 !modules/cicd/github
 !modules/cicd/github/iam.tf
@@ -55,26 +57,31 @@
 !modules/cicd/github/outputs.tf
 !modules/cicd/github/variables.tf
 
-# Target module - modules/core/secrets
+# Modules - core/secrets
 !modules/core
 !modules/core/secrets
 !modules/core/secrets/main.tf
 !modules/core/secrets/outputs.tf
 !modules/core/secrets/variables.tf
 
-# Target module - modules/core/webhook-handler
+# Modules - core/webhook-handler
 !modules/core/webhook-handler
 !modules/core/webhook-handler/api-gateway.tf
 !modules/core/webhook-handler/iam.tf
 !modules/core/webhook-handler/lambda.tf
 !modules/core/webhook-handler/outputs.tf
 !modules/core/webhook-handler/variables.tf
+!modules/core/webhook-handler/policies
+!modules/core/webhook-handler/policies/assume-role-policy.json
+!modules/core/webhook-handler/policies/lambda-policy.json.tpl
 
-# Target module - modules-optional/ai-output-processor
-!modules-optional
-!modules-optional/ai-output-processor
-!modules-optional/ai-output-processor/api-gateway.tf
-!modules-optional/ai-output-processor/iam.tf
-!modules-optional/ai-output-processor/outputs.tf
-!modules-optional/ai-output-processor/processor.tf
-!modules-optional/ai-output-processor/variables.tf
+# Modules - core/ai-output-processor
+!modules/core/ai-output-processor
+!modules/core/ai-output-processor/api-gateway.tf
+!modules/core/ai-output-processor/iam.tf
+!modules/core/ai-output-processor/outputs.tf
+!modules/core/ai-output-processor/processor.tf
+!modules/core/ai-output-processor/variables.tf
+!modules/core/ai-output-processor/policies
+!modules/core/ai-output-processor/policies/assume-role-policy.json
+!modules/core/ai-output-processor/policies/lambda-policy.json.tpl

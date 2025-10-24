@@ -66,7 +66,7 @@ variable "api_gateway_stage" {
 variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
-  default     = 7
+  default     = 365
 }
 
 variable "enable_xray_tracing" {
@@ -113,6 +113,36 @@ variable "webhook_additional_env_vars" {
 
 variable "telegram_additional_env_vars" {
   description = "Additional environment variables for Telegram bot Lambda"
+  type        = map(string)
+  default     = {}
+}
+
+# AI Output Processor Configuration (Lambda always exists)
+variable "ai_processor_lambda_zip_path" {
+  description = "Path to AI output processor Lambda ZIP file"
+  type        = string
+}
+
+variable "enable_ai_processing" {
+  description = "Enable AI processing via AWS Bedrock (requires Bedrock permissions)"
+  type        = bool
+  default     = false
+}
+
+variable "ai_model_id" {
+  description = "AWS Bedrock model ID for AI processing"
+  type        = string
+  default     = "anthropic.claude-3-haiku-20240307-v1:0"
+}
+
+variable "ai_threshold" {
+  description = "Minimum message length (characters) to trigger AI processing"
+  type        = number
+  default     = 1000
+}
+
+variable "ai_processor_additional_env_vars" {
+  description = "Additional environment variables for AI processor Lambda"
   type        = map(string)
   default     = {}
 }
