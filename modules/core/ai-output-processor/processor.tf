@@ -25,7 +25,10 @@ resource "aws_kms_alias" "lambda_env_key_alias" {
 
 # SQS Dead Letter Queue for failed Lambda invocations
 resource "aws_sqs_queue" "lambda_dlq" {
-  name = "${var.function_name}-dlq"
+  name                       = "${var.function_name}-dlq"
+  sqs_managed_sse_enabled    = true
+  message_retention_seconds  = 1209600 # 14 days
+  visibility_timeout_seconds = 300
 
   tags = var.tags
 }

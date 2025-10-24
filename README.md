@@ -74,7 +74,7 @@ module "chatops" {
 
 # Separate AI Output Processor module
 module "ai_processor" {
-  source = "github.com/your-org/terraform-aws-chatops//modules-optional/ai-output-processor"
+  source = "github.com/your-org/terraform-aws-chatops//modules/core/ai-output-processor"
 
   function_name        = "my-chatops-ai-processor"
   api_gateway_name     = "my-chatops-ai-api"
@@ -96,14 +96,12 @@ target-module/
 ├── modules/
 │   ├── core/
 │   │   ├── secrets/                 # Centralized secret management
-│   │   └── webhook-handler/         # Main webhook processor (no AI)
+│   │   ├── webhook-handler/         # Main webhook processor
+│   │   └── ai-output-processor/     # AI output processing
 │   ├── cicd/
 │   │   └── github/                  # GitHub OIDC + IAM
 │   └── chat/
 │       └── telegram/                # Telegram bot integration
-│
-├── modules-optional/
-│   └── ai-output-processor/         # Optional AI processing (separate)
 │
 └── examples/
     ├── basic/                       # Telegram + GitHub (no AI)
