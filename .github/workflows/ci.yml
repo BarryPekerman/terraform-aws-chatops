@@ -1,14 +1,6 @@
 name: Continuous Integration
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - '*.tf'
-      - '*.tfvars'
-      - 'modules/**/*.tf'
-      - 'examples/**/*.tf'
-      - '.github/workflows/ci.yml'
   pull_request:
     branches: [ main, develop ]
     paths:
