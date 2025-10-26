@@ -102,4 +102,10 @@ variable "log_retention_days" {
   default     = 7
 }
 
+variable "enable_security_alarms" {
+  description = "Enable CloudWatch security alarms and enhanced logging"
+  type        = bool
+  default     = false
+}
+
 

@@ -27,11 +27,13 @@ module "chatops" {
   authorized_chat_id = var.authorized_chat_id
   s3_bucket_arn      = var.s3_bucket_arn
 
-  webhook_lambda_zip_path  = var.webhook_lambda_zip_path
-  telegram_lambda_zip_path = var.telegram_lambda_zip_path
+  webhook_lambda_zip_path      = var.webhook_lambda_zip_path
+  telegram_lambda_zip_path     = var.telegram_lambda_zip_path
+  ai_processor_lambda_zip_path = var.ai_processor_lambda_zip_path
 
   max_message_length = var.max_message_length
   log_retention_days = var.log_retention_days
+  enable_security_alarms = var.enable_security_alarms
 
   tags = {
     Environment = "production"

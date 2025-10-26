@@ -1,3 +1,5 @@
+# Variables for ChatOps with Security Example
+
 variable "aws_region" {
   description = "AWS region"
   type        = string
@@ -7,7 +9,7 @@ variable "aws_region" {
 variable "name_prefix" {
   description = "Prefix for resource names"
   type        = string
-  default     = "chatops"
+  default     = "chatops-secure"
 }
 
 variable "github_owner" {
@@ -77,11 +79,3 @@ variable "log_retention_days" {
   type        = number
   default     = 7
 }
-
-variable "enable_security_alarms" {
-  description = "Enable CloudWatch security alarms and enhanced logging"
-  type        = bool
-  default     = false
-}
-
-
