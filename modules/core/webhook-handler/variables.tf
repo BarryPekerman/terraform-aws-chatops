@@ -93,6 +93,12 @@ variable "additional_env_vars" {
   default     = {}
 }
 
+variable "enable_security_alarms" {
+  description = "Enable CloudWatch security alarms and enhanced logging"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Tags to apply to resources"
   type        = map(string)

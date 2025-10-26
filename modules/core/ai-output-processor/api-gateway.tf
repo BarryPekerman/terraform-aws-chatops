@@ -13,12 +13,28 @@ resource "aws_api_gateway_resource" "output_processor_resource" {
   path_part   = "process"
 }
 
+# Request validator for AI processor security
+resource "aws_api_gateway_request_validator" "ai_processor_validator" {
+  name                        = "${var.api_gateway_name}-validator"
+  rest_api_id                 = aws_api_gateway_rest_api.output_processor_api.id
+  validate_request_body       = true
+  validate_request_parameters = true
+}
+
 resource "aws_api_gateway_method" "output_processor_method" {
   rest_api_id      = aws_api_gateway_rest_api.output_processor_api.id
   resource_id      = aws_api_gateway_resource.output_processor_resource.id
   http_method      = "POST"
   authorization    = "NONE"
   api_key_required = var.api_key_required
+  
+  # Request validation parameters
+  request_parameters = {
+    "method.request.header.Content-Type" = true
+    "method.request.header.Authorization" = false  # Optional for internal API calls
+  }
+  
+  request_validator_id = aws_api_gateway_request_validator.ai_processor_validator.id
 }
 
 resource "aws_api_gateway_integration" "output_processor_integration" {

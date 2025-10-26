@@ -38,7 +38,6 @@ resource "aws_sqs_queue" "lambda_dlq" {
 resource "aws_cloudwatch_log_group" "bot_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
-  kms_key_id        = aws_kms_key.lambda_env_key.arn
 
   tags = var.tags
 }

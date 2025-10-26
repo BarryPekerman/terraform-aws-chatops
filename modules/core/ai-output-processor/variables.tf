@@ -37,6 +37,12 @@ variable "ai_model_id" {
   default     = "anthropic.claude-3-haiku-20240307-v1:0"
 }
 
+variable "ai_max_tokens" {
+  description = "Maximum tokens for AI model response (cost control)"
+  type        = number
+  default     = 1000
+}
+
 variable "stage_name" {
   description = "API Gateway stage name"
   type        = string
@@ -59,6 +65,12 @@ variable "additional_env_vars" {
   description = "Additional environment variables for Lambda"
   type        = map(string)
   default     = {}
+}
+
+variable "enable_security_alarms" {
+  description = "Enable CloudWatch security alarms and enhanced logging"
+  type        = bool
+  default     = false
 }
 
 variable "tags" {
