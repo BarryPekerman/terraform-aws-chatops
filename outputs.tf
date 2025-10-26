@@ -56,17 +56,17 @@ output "telegram_bot_function_name" {
 # AI Output Processor Outputs
 output "ai_processor_url" {
   description = "AI output processor API Gateway URL"
-  value       = module.ai_processor.api_gateway_url
+  value       = module.ai_processor.processor_api_url
 }
 
 output "ai_processor_function_arn" {
   description = "ARN of the AI output processor Lambda"
-  value       = module.ai_processor.lambda_function_arn
+  value       = module.ai_processor.processor_function_arn
 }
 
 output "ai_processor_function_name" {
   description = "Name of the AI output processor Lambda"
-  value       = module.ai_processor.lambda_function_name
+  value       = module.ai_processor.processor_function_name
 }
 
 

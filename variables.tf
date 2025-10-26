@@ -66,7 +66,7 @@ variable "api_gateway_stage" {
 variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
-  default     = 365
+  default     = 7
 }
 
 variable "enable_xray_tracing" {
@@ -141,10 +141,22 @@ variable "ai_threshold" {
   default     = 1000
 }
 
+variable "ai_max_tokens" {
+  description = "Maximum tokens for AI model response (cost control)"
+  type        = number
+  default     = 1000
+}
+
 variable "ai_processor_additional_env_vars" {
   description = "Additional environment variables for AI processor Lambda"
   type        = map(string)
   default     = {}
+}
+
+variable "enable_security_alarms" {
+  description = "Enable CloudWatch security alarms and enhanced logging for all Lambda functions"
+  type        = bool
+  default     = false
 }
 
 variable "tags" {

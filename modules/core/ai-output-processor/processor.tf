@@ -37,7 +37,6 @@ resource "aws_sqs_queue" "lambda_dlq" {
 resource "aws_cloudwatch_log_group" "output_processor_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
-  kms_key_id        = aws_kms_key.lambda_env_key.arn
 
   tags = var.tags
 }
@@ -62,6 +61,7 @@ resource "aws_lambda_function" "output_processor" {
         MAX_MESSAGE_LENGTH   = tostring(var.max_message_length)
         AI_THRESHOLD         = tostring(var.ai_threshold)
         AI_MODEL_ID          = var.ai_model_id
+        AI_MAX_TOKENS        = tostring(var.ai_max_tokens)
       },
       var.additional_env_vars
     )

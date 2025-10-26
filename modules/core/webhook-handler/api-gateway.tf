@@ -17,6 +17,14 @@ resource "aws_api_gateway_resource" "webhook" {
   path_part   = "webhook"
 }
 
+# Request validator for webhook security
+resource "aws_api_gateway_request_validator" "webhook_validator" {
+  name                        = "${var.api_gateway_name}-validator"
+  rest_api_id                 = aws_api_gateway_rest_api.webhook_api.id
+  validate_request_body       = true
+  validate_request_parameters = true
+}
+
 # API Gateway method (POST)
 resource "aws_api_gateway_method" "webhook_post" {
   rest_api_id      = aws_api_gateway_rest_api.webhook_api.id
@@ -24,6 +32,15 @@ resource "aws_api_gateway_method" "webhook_post" {
   http_method      = "POST"
   authorization    = "NONE"
   api_key_required = var.api_key_required
+  
+  # Request validation parameters
+  request_parameters = {
+    "method.request.header.Content-Type" = true
+    "method.request.header.X-GitHub-Event" = false  # Optional for GitHub webhooks
+    "method.request.header.X-Hub-Signature-256" = false  # Optional for signature verification
+  }
+  
+  request_validator_id = aws_api_gateway_request_validator.webhook_validator.id
 }
 
 # API Gateway method (OPTIONS) for CORS
@@ -124,7 +141,7 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   tags = var.tags
 }
 
-# API Gateway stage with logging
+# API Gateway stage with enhanced security logging
 resource "aws_api_gateway_stage" "webhook_stage" {
   deployment_id = aws_api_gateway_deployment.webhook_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.webhook_api.id
@@ -132,11 +149,13 @@ resource "aws_api_gateway_stage" "webhook_stage" {
 
   xray_tracing_enabled = var.enable_xray_tracing
 
+  # Enhanced access logging with security focus
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
     format = jsonencode({
       requestId      = "$context.requestId"
       ip             = "$context.identity.sourceIp"
+      userAgent      = "$context.identity.userAgent"
       caller         = "$context.identity.caller"
       user           = "$context.identity.user"
       requestTime    = "$context.requestTime"
@@ -145,6 +164,13 @@ resource "aws_api_gateway_stage" "webhook_stage" {
       status         = "$context.status"
       protocol       = "$context.protocol"
       responseLength = "$context.responseLength"
+      responseTime   = "$context.responseTime"
+      errorMessage   = "$context.error.message"
+      errorType      = "$context.error.messageString"
+      # Security-specific fields
+      apiKeyId       = "$context.identity.apiKeyId"
+      requestTimeEpoch = "$context.requestTimeEpoch"
+      integrationLatency = "$context.integrationLatency"
     })
   }
 

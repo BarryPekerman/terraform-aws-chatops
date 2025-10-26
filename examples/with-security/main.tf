@@ -1,18 +1,5 @@
-# Basic Example - ChatOps with Telegram + GitHub (No AI)
-
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 6.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = var.aws_region
-}
+# ChatOps with Security Alarms Example
+# This example shows how to enable security monitoring and alarms
 
 module "chatops" {
   source = "../../"
@@ -32,13 +19,14 @@ module "chatops" {
 
   max_message_length = var.max_message_length
   log_retention_days = var.log_retention_days
-  enable_security_alarms = var.enable_security_alarms
+  
+  # 🔒 SECURITY: Enable security alarms and enhanced logging
+  enable_security_alarms = true
 
   tags = {
     Environment = "production"
     Project     = "chatops"
     ManagedBy   = "terraform"
+    Security    = "enabled"
   }
 }
-
-

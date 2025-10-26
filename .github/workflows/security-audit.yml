@@ -6,14 +6,6 @@ permissions:
   actions: read
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - '*.tf'
-      - '*.tfvars'
-      - 'modules/**/*.tf'
-      - 'examples/**/*.tf'
-      - '.github/workflows/security-audit.yml'
   pull_request:
     branches: [ main, develop ]
     paths:

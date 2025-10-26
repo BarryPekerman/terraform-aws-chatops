@@ -14,12 +14,9 @@ A production-ready Terraform module for building ChatOps workflows on AWS. This 
 │  │  • Secrets   │   │  • GitHub    │   │  • Telegram  │         │
 │  │  • Webhook   │   │    OIDC      │   │              │         │
 │  │    Handler   │   │  • IAM       │   │              │         │
+│  │  • AI        │   │              │   │              │         │
+│  │    Processor │   │              │   │              │         │
 │  └──────────────┘   └──────────────┘   └──────────────┘         │
-│                                                                 │
-│  ┌─────────────────────────────────────────────────────┐        │
-│  │          Separate: AI Output Processor              │        │
-│  │          (Bedrock integration for long outputs)     │        │
-│  └─────────────────────────────────────────────────────┘        │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -28,61 +25,17 @@ A production-ready Terraform module for building ChatOps workflows on AWS. This 
 - **Telegram Integration**: Full bot integration with chat authorization
 - **Secure CI/CD Integration**: GitHub OIDC authentication with least-privilege IAM
 - **Centralized Secret Management**: AWS Secrets Manager for all credentials
-- **Separate AI Processing**: Optional AWS Bedrock integration for output summarization
+- **Core AI Processing**: Built-in AWS Bedrock integration for output summarization
 - **Production Ready**: CloudWatch logging, X-Ray tracing, API throttling
-- **Modular Architecture**: Core module + optional AI processor
+- **Modular Architecture**: Core modules (secrets, webhook, AI) + CI/CD + chat integration
 
 ## Quick Start
 
-### Basic Example (No AI)
+See the [examples/](examples/) directory for complete usage examples:
 
-```hcl
-module "chatops" {
-  source = "github.com/your-org/terraform-aws-chatops"
-
-  name_prefix        = "my-chatops"
-  github_owner       = "my-org"
-  github_repo        = "my-repo"
-  github_token       = var.github_token
-  telegram_bot_token = var.telegram_bot_token
-  authorized_chat_id = var.authorized_chat_id
-  s3_bucket_arn      = "arn:aws:s3:::my-terraform-state"
-
-  webhook_lambda_zip_path  = "lambda_function.zip"
-  telegram_lambda_zip_path = "telegram-bot.zip"
-}
-```
-
-### With AI Processing
-
-```hcl
-# Base ChatOps module (no AI)
-module "chatops" {
-  source = "github.com/your-org/terraform-aws-chatops"
-  
-  name_prefix        = "my-chatops"
-  github_owner       = "my-org"
-  github_repo        = "my-repo"
-  github_token       = var.github_token
-  telegram_bot_token = var.telegram_bot_token
-  authorized_chat_id = var.authorized_chat_id
-  s3_bucket_arn      = "arn:aws:s3:::my-terraform-state"
-  
-  webhook_lambda_zip_path  = "webhook-handler.zip"
-  telegram_lambda_zip_path = "telegram-bot.zip"
-}
-
-# Separate AI Output Processor module
-module "ai_processor" {
-  source = "github.com/your-org/terraform-aws-chatops//modules/core/ai-output-processor"
-
-  function_name        = "my-chatops-ai-processor"
-  api_gateway_name     = "my-chatops-ai-api"
-  lambda_zip_path      = "ai-output-processor.zip"
-  enable_ai_processing = true
-  ai_model_id          = "anthropic.claude-3-haiku-20240307-v1:0"
-}
-```
+- **[examples/basic/](examples/basic/)** - Basic Telegram + GitHub integration
+- **[examples/with-ai/](examples/with-ai/)** - With AI output processing  
+- **[examples/with-security/](examples/with-security/)** - Enterprise security monitoring
 
 ## Module Structure
 
@@ -97,7 +50,7 @@ target-module/
 │   ├── core/
 │   │   ├── secrets/                 # Centralized secret management
 │   │   ├── webhook-handler/         # Main webhook processor
-│   │   └── ai-output-processor/     # AI output processing
+│   │   └── ai-output-processor/     # Core: AI output processing
 │   ├── cicd/
 │   │   └── github/                  # GitHub OIDC + IAM
 │   └── chat/
@@ -105,8 +58,37 @@ target-module/
 │
 └── examples/
     ├── basic/                       # Telegram + GitHub (no AI)
-    └── with-ai/                     # Telegram + GitHub + AI processor
+    ├── with-ai/                     # Telegram + GitHub + AI processor
+    └── with-security/               # Enterprise security monitoring
 ```
+
+## 🔒 Security Features
+
+### **Optional Security Monitoring**
+The module includes optional enterprise-grade security monitoring:
+
+```hcl
+module "chatops" {
+  source = "github.com/your-org/terraform-aws-chatops"
+  
+  # ... other variables
+  
+  # 🔒 Enable security alarms and enhanced logging
+  enable_security_alarms = true
+}
+```
+
+### **Security Features (When Enabled)**
+- **CloudWatch Security Alarms** - DDoS detection, attack monitoring, cost control
+- **Enhanced Logging** - Security-focused log groups with 7-day retention
+- **SNS Notifications** - Real-time alerts for security events
+- **Request Validation** - API Gateway request validation and filtering
+
+### **Cost Impact**
+- **Security Disabled**: $6.80/month (default)
+- **Security Enabled**: $9.80/month (+$3/month for security monitoring)
+
+See [examples/with-security/](examples/with-security/) for detailed security configuration.
 
 ## Requirements
 
@@ -153,6 +135,7 @@ target-module/
 | quota_limit              | API Gateway quota limit                    | `number` | `10000`  |
 | quota_period             | API Gateway quota period                   | `string` | `"DAY"`  |
 | webhook_api_key_required | Whether webhook API requires API key       | `bool`   | `false`  |
+| enable_security_alarms   | Enable CloudWatch security alarms and enhanced logging | `bool` | `false` |
 | tags                     | Tags to apply to all resources             | `map(string)` | `{"ManagedBy": "terraform", "Project": "chatops"}` |
 
 ## Outputs
@@ -188,13 +171,6 @@ target-module/
 - **API Gateway Security**: Rate limiting, throttling, optional API keys
 - **CloudWatch Logging**: Comprehensive audit trails
 - **X-Ray Tracing**: Request tracing for debugging
-
-## Examples
-
-See the [examples](./examples/) directory for complete usage examples:
-
-- [Basic](./examples/basic/) - Telegram + GitHub (no AI)
-- [With AI](./examples/with-ai/) - Telegram + GitHub + AI processor
 
 ## License
 

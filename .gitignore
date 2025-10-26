@@ -37,6 +37,12 @@
 !examples/with-ai/variables.tf
 !examples/with-ai/terraform.tfvars.example
 
+# Examples - with-security
+!examples/with-security
+!examples/with-security/main.tf
+!examples/with-security/variables.tf
+!examples/with-security/README.md
+
 # Modules - chat/telegram
 !modules
 !modules/chat
@@ -45,6 +51,7 @@
 !modules/chat/telegram/iam.tf
 !modules/chat/telegram/outputs.tf
 !modules/chat/telegram/variables.tf
+!modules/chat/telegram/security.tf
 !modules/chat/telegram/policies
 !modules/chat/telegram/policies/assume-role-policy.json
 !modules/chat/telegram/policies/lambda-policy.json.tpl
@@ -71,6 +78,7 @@
 !modules/core/webhook-handler/lambda.tf
 !modules/core/webhook-handler/outputs.tf
 !modules/core/webhook-handler/variables.tf
+!modules/core/webhook-handler/security.tf
 !modules/core/webhook-handler/policies
 !modules/core/webhook-handler/policies/assume-role-policy.json
 !modules/core/webhook-handler/policies/lambda-policy.json.tpl
@@ -82,6 +90,13 @@
 !modules/core/ai-output-processor/outputs.tf
 !modules/core/ai-output-processor/processor.tf
 !modules/core/ai-output-processor/variables.tf
+!modules/core/ai-output-processor/security.tf
 !modules/core/ai-output-processor/policies
 !modules/core/ai-output-processor/policies/assume-role-policy.json
 !modules/core/ai-output-processor/policies/lambda-policy.json.tpl
+
+# Modules - core/security
+!modules/core/security
+!modules/core/security/main.tf
+!modules/core/security/variables.tf
+!modules/core/security/outputs.tf
