@@ -9,6 +9,14 @@ on:
       - 'modules/**/*.tf'
       - 'examples/**/*.tf'
       - '.github/workflows/terraform-plan.yml'
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '*.tf'
+      - '*.tfvars'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
+      - '.github/workflows/terraform-plan.yml'
 
 env:
   TF_VERSION: "1.6.0"
@@ -53,7 +61,6 @@ jobs:
         run: |
           cd examples/basic
           terraform plan -out=tfplan -no-color
-        continue-on-error: true
 
       - name: Save plan output
         if: always()
@@ -134,7 +141,6 @@ jobs:
         run: |
           cd examples/with-ai
           terraform plan -out=tfplan -no-color
-        continue-on-error: true
 
       - name: Save plan output
         if: always()
@@ -214,7 +220,6 @@ jobs:
         run: |
           cd examples/with-security
           terraform plan -out=tfplan -no-color
-        continue-on-error: true
 
       - name: Save plan output
         if: always()
