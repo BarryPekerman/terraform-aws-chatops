@@ -2,11 +2,13 @@
 # This module provides security alarms and logging for any Lambda function
 
 # SNS Topic for security alerts
+# trivy:ignore:AVD-AWS-0136 Using AWS-managed encryption per ADR-0006 (cost optimization, AWS-managed encryption is secure)
 resource "aws_sns_topic" "security_alerts" {
   count = var.enable_security_alarms ? 1 : 0
 
-  name = "${var.function_name}-security-alerts"
-  tags = var.tags
+  name              = "${var.function_name}-security-alerts"
+  kms_master_key_id = "alias/aws/sns" # AWS-managed encryption (free) - see ADR-0006
+  tags              = var.tags
 }
 
 # SNS Topic Policy for CloudWatch to publish alerts

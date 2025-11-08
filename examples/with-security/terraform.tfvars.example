@@ -21,3 +21,4 @@ log_retention_days = 7
 # Note: enable_security_alarms is set to true in main.tf
 # This example enables CloudWatch security alarms and enhanced logging
 
+

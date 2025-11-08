@@ -1,7 +1,3 @@
-# Data sources
-data "aws_region" "current" {}
-data "aws_caller_identity" "current" {}
-
 # IAM role for output processor Lambda
 resource "aws_iam_role" "output_processor_role" {
   name        = "${var.function_name}-role"

@@ -43,7 +43,7 @@ jobs:
           name_prefix        = "test-chatops"
           github_owner       = "test-org"
           github_repo        = "test-repo"
-          github_token       = "dummy-token-12345"
+          github_token       = "ghp_dummy123456789012345678901234567890"
           telegram_bot_token = "123456:ABC-DEF-dummy-token"
           authorized_chat_id = "123456789"
           s3_bucket_arn      = "arn:aws:s3:::test-bucket"
@@ -120,7 +120,7 @@ jobs:
           name_prefix        = "test-chatops"
           github_owner       = "test-org"
           github_repo        = "test-repo"
-          github_token       = "dummy-token-12345"
+          github_token       = "ghp_dummy123456789012345678901234567890"
           telegram_bot_token = "123456:ABC-DEF-dummy-token"
           authorized_chat_id = "123456789"
           s3_bucket_arn      = "arn:aws:s3:::test-bucket"
@@ -200,14 +200,13 @@ jobs:
           name_prefix        = "test-chatops-secure"
           github_owner       = "test-org"
           github_repo        = "test-repo"
-          github_token       = "dummy-token-12345"
+          github_token       = "ghp_dummy123456789012345678901234567890"
           telegram_bot_token = "123456:ABC-DEF-dummy-token"
           authorized_chat_id = "123456789"
           s3_bucket_arn      = "arn:aws:s3:::test-bucket"
           webhook_lambda_zip_path      = "lambda_function.zip"
           telegram_lambda_zip_path     = "telegram-bot.zip"
           ai_processor_lambda_zip_path = "output_processor.zip"
-          enable_security_alarms = true
           EOF
 
       - name: Terraform Init
