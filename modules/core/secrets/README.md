@@ -77,10 +77,12 @@ This module has no dependencies on other modules. It should be created first as 
 1. **Lifecycle Protection**: The secret uses `ignore_changes = [secret_string]` to prevent accidental overwrites from Terraform
 2. **Secret Updates**: To update secrets after creation, use AWS Console, AWS CLI, or Secrets Manager API directly
 3. **Callback URL**: The `callback_url` field is automatically updated by a `null_resource` in the root module after the webhook API Gateway is created. This ensures GitHub Actions workflows always use the correct callback URL without manual updates
-4. **Secret Rotation**: Automatic rotation is not configured in this module. See [Advanced Configuration](../../../docs/ADVANCED.md) for rotation setup
-5. **Secret Naming**: Secret name format: `${name_prefix}/secrets`
-6. **Terraform Backend**: The `terraform_backend_secret_arn` output is provided for convenience and references the same secret
-7. **Sensitive Variables**: All token variables are marked as `sensitive` to prevent accidental exposure in logs
+4. **Secret Rotation**: Automatic rotation is not configured in this module. These are static credentials (GitHub token, Telegram bot token, API key) that are updated manually when needed. Automatic rotation would require a Lambda function and doesn't provide value for static credentials. See [ADR-0006](../../../docs/adr/0006-remove-kms-keys-use-aws-managed-encryption.md) for details.
+5. **Encryption**: Secrets use AWS-managed encryption (default) instead of KMS CMK. This is intentional per [ADR-0006](../../../docs/adr/0006-remove-kms-keys-use-aws-managed-encryption.md) to avoid KMS costs ($1/month per key). AWS-managed encryption is secure and meets most security requirements. For compliance requirements that mandate customer-managed keys, users can add KMS keys in their own configuration.
+6. **Secret Naming**: Secret name format: `${name_prefix}/secrets`
+7. **Terraform Backend**: The `terraform_backend_secret_arn` output is provided for convenience and references the same secret
+8. **Sensitive Variables**: All token variables are marked as `sensitive` to prevent accidental exposure in logs
+9. **Checkov Suppressions**: This module suppresses Checkov rules CKV_AWS_149 (KMS CMK) and CKV_AWS_193 (automatic rotation) with documented reasoning. See resource comments in `main.tf` for details.
 
 ## Example: With API Gateway Key
 
