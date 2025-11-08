@@ -69,4 +69,26 @@ output "ai_processor_function_name" {
   value       = module.ai_processor.processor_function_name
 }
 
+# Project Registry Outputs
+output "project_registry_secret_arn" {
+  description = "ARN of the project registry secret"
+  value       = module.core_secrets.project_registry_secret_arn
+}
+
+output "project_registry_secret_name" {
+  description = "Name of the project registry secret"
+  value       = module.core_secrets.project_registry_secret_name
+}
+
+# Monitoring Outputs
+output "dashboard_url" {
+  description = "URL to the CloudWatch dashboard"
+  value       = module.monitoring.dashboard_url
+}
+
+output "dashboard_arn" {
+  description = "ARN of the CloudWatch dashboard"
+  value       = module.monitoring.dashboard_arn
+}
+
 

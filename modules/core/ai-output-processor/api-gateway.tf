@@ -27,13 +27,13 @@ resource "aws_api_gateway_method" "output_processor_method" {
   http_method      = "POST"
   authorization    = "NONE"
   api_key_required = var.api_key_required
-  
+
   # Request validation parameters
   request_parameters = {
-    "method.request.header.Content-Type" = true
-    "method.request.header.Authorization" = false  # Optional for internal API calls
+    "method.request.header.Content-Type"  = true
+    "method.request.header.Authorization" = false # Optional for internal API calls
   }
-  
+
   request_validator_id = aws_api_gateway_request_validator.ai_processor_validator.id
 }
 
@@ -70,7 +70,8 @@ resource "aws_api_gateway_deployment" "output_processor_deployment" {
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   name              = "/aws/apigateway/${var.api_gateway_name}"
   retention_in_days = var.log_retention_days
-  kms_key_id        = aws_kms_key.lambda_env_key.arn
+  # Note: CloudWatch Logs uses AWS managed encryption by default
+  # Custom KMS keys require additional permissions that may not be available
 
   tags = var.tags
 }
@@ -81,22 +82,6 @@ resource "aws_api_gateway_stage" "output_processor_stage" {
   stage_name    = var.stage_name
 
   xray_tracing_enabled = true
-
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
-    format = jsonencode({
-      requestId      = "$requestId"
-      ip             = "$context.identity.sourceIp"
-      caller         = "$context.identity.caller"
-      user           = "$context.identity.user"
-      requestTime    = "$context.requestTime"
-      httpMethod     = "$context.httpMethod"
-      resourcePath   = "$context.resourcePath"
-      status         = "$context.status"
-      protocol       = "$context.protocol"
-      responseLength = "$context.responseLength"
-    })
-  }
 
   tags = var.tags
 }
@@ -114,7 +99,8 @@ resource "aws_lambda_permission" "output_processor_permission" {
 resource "aws_api_gateway_api_key" "output_processor_key" {
   count = var.api_key_required ? 1 : 0
 
-  name = "${var.api_gateway_name}-key"
+  name        = "${var.api_gateway_name}-key"
+  description = "API Key for AI output processor authentication"
 
   tags = var.tags
 }

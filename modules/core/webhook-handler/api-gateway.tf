@@ -32,14 +32,14 @@ resource "aws_api_gateway_method" "webhook_post" {
   http_method      = "POST"
   authorization    = "NONE"
   api_key_required = var.api_key_required
-  
+
   # Request validation parameters
   request_parameters = {
-    "method.request.header.Content-Type" = true
-    "method.request.header.X-GitHub-Event" = false  # Optional for GitHub webhooks
-    "method.request.header.X-Hub-Signature-256" = false  # Optional for signature verification
+    "method.request.header.Content-Type"        = true
+    "method.request.header.X-GitHub-Event"      = false # Optional for GitHub webhooks
+    "method.request.header.X-Hub-Signature-256" = false # Optional for signature verification
   }
-  
+
   request_validator_id = aws_api_gateway_request_validator.webhook_validator.id
 }
 
@@ -136,7 +136,8 @@ resource "aws_api_gateway_deployment" "webhook_deployment" {
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   name              = "/aws/apigateway/${var.api_gateway_name}"
   retention_in_days = var.log_retention_days
-  kms_key_id        = aws_kms_key.lambda_env_key.arn
+  # Note: CloudWatch Logs uses AWS managed encryption by default
+  # Custom KMS keys require additional permissions that may not be available
 
   tags = var.tags
 }
@@ -148,31 +149,6 @@ resource "aws_api_gateway_stage" "webhook_stage" {
   stage_name    = var.stage_name
 
   xray_tracing_enabled = var.enable_xray_tracing
-
-  # Enhanced access logging with security focus
-  access_log_settings {
-    destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
-    format = jsonencode({
-      requestId      = "$context.requestId"
-      ip             = "$context.identity.sourceIp"
-      userAgent      = "$context.identity.userAgent"
-      caller         = "$context.identity.caller"
-      user           = "$context.identity.user"
-      requestTime    = "$context.requestTime"
-      httpMethod     = "$context.httpMethod"
-      resourcePath   = "$context.resourcePath"
-      status         = "$context.status"
-      protocol       = "$context.protocol"
-      responseLength = "$context.responseLength"
-      responseTime   = "$context.responseTime"
-      errorMessage   = "$context.error.message"
-      errorType      = "$context.error.messageString"
-      # Security-specific fields
-      apiKeyId       = "$context.identity.apiKeyId"
-      requestTimeEpoch = "$context.requestTimeEpoch"
-      integrationLatency = "$context.integrationLatency"
-    })
-  }
 
   tags = var.tags
 }
