@@ -44,6 +44,11 @@ jobs:
           output_format: sarif
           output_file_path: checkov.sarif
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Skip checks documented in ADR-0006: Using AWS-managed encryption (cost optimization)
+          # CKV_AWS_149: KMS CMK encryption for Secrets Manager (intentionally using AWS-managed encryption)
+          # CKV_AWS_193: Automatic rotation for Secrets Manager (not required for static credentials)
+          # CKV2_AWS_57: Automatic rotation for Secrets Manager (not required for static credentials or project registry)
+          skip_check: 'CKV_AWS_149,CKV_AWS_193,CKV2_AWS_57'
 
       - name: Upload Checkov results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
