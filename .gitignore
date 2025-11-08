@@ -109,3 +109,11 @@ tfsec
 !modules/core/security/main.tf
 !modules/core/security/variables.tf
 !modules/core/security/outputs.tf
+
+# Modules - core/monitoring
+!modules/core/monitoring
+!modules/core/monitoring/main.tf
+!modules/core/monitoring/variables.tf
+!modules/core/monitoring/outputs.tf
+!modules/core/monitoring/dashboard.tf
+!modules/core/monitoring/README.md
