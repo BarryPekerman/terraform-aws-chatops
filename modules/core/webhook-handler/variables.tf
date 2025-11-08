@@ -117,6 +117,11 @@ variable "enable_security_alarms" {
   default     = false
 }
 
+variable "reserved_concurrent_executions" {
+  description = "Reserved concurrent executions for Lambda function (prevents runaway costs)"
+  type        = number
+  default     = 10
+}
 
 variable "tags" {
   description = "Tags to apply to resources"

@@ -2,6 +2,7 @@
 # This module provides security alarms and logging for any Lambda function
 
 # SNS Topic for security alerts
+# checkov:skip=CKV_AWS_26:Using default SNS encryption per ADR-0006 (no KMS keys)
 # trivy:ignore:AVD-AWS-0095 Using default SNS encryption per ADR-0006 (cost optimization, no KMS keys)
 # trivy:ignore:AVD-AWS-0136 Using default SNS encryption per ADR-0006 (cost optimization, no KMS keys)
 resource "aws_sns_topic" "security_alerts" {
@@ -34,6 +35,7 @@ resource "aws_sns_topic_policy" "security_alerts_policy" {
 
 # Security-focused CloudWatch log group
 # checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "security_logs" {
   count = var.enable_security_alarms ? 1 : 0
@@ -49,6 +51,7 @@ resource "aws_cloudwatch_log_group" "security_logs" {
 
 # Enhanced API Gateway access logging
 # checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "enhanced_api_logs" {
   count = var.enable_security_alarms ? 1 : 0

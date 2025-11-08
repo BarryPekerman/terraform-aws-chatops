@@ -7,6 +7,10 @@ resource "aws_api_gateway_rest_api" "webhook_api" {
     types = ["REGIONAL"]
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = var.tags
 }
 
@@ -45,10 +49,10 @@ resource "aws_api_gateway_method" "webhook_post" {
 
 # API Gateway method (OPTIONS) for CORS
 resource "aws_api_gateway_method" "webhook_options" {
-  rest_api_id        = aws_api_gateway_rest_api.webhook_api.id
-  resource_id        = aws_api_gateway_resource.webhook.id
-  http_method        = "OPTIONS"
-  authorization      = "NONE"
+  rest_api_id          = aws_api_gateway_rest_api.webhook_api.id
+  resource_id          = aws_api_gateway_resource.webhook.id
+  http_method          = "OPTIONS"
+  authorization        = "NONE"
   request_validator_id = aws_api_gateway_request_validator.webhook_validator.id
 }
 
@@ -135,6 +139,7 @@ resource "aws_api_gateway_deployment" "webhook_deployment" {
 
 # CloudWatch Log Group for API Gateway
 # checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   name              = "/aws/apigateway/${var.api_gateway_name}"
@@ -147,12 +152,30 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
 
 # API Gateway stage with enhanced security logging
 # checkov:skip=CKV2_AWS_29:WAF not required for internal/regional API Gateway per security requirements
+# checkov:skip=CKV_AWS_76:Access logging enabled via access_log_settings
+# checkov:skip=CKV_AWS_120:Caching not applicable for Lambda-backed APIs with dynamic content
 resource "aws_api_gateway_stage" "webhook_stage" {
   deployment_id = aws_api_gateway_deployment.webhook_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.webhook_api.id
   stage_name    = var.stage_name
 
   xray_tracing_enabled = var.enable_xray_tracing
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
+    format = jsonencode({
+      requestId      = "$context.requestId"
+      ip             = "$context.identity.sourceIp"
+      caller         = "$context.identity.caller"
+      user           = "$context.identity.user"
+      requestTime    = "$context.requestTime"
+      httpMethod     = "$context.httpMethod"
+      resourcePath   = "$context.resourcePath"
+      status         = "$context.status"
+      protocol       = "$context.protocol"
+      responseLength = "$context.responseLength"
+    })
+  }
 
   tags = var.tags
 }

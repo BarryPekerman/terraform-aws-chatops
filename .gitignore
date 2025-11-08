@@ -8,6 +8,9 @@
 *.zip
 tfsec
 
+# Allow Checkov configuration file
+!.checkov.yaml
+
 # Allow specific files explicitly (no wildcards or shell expansion)
 
 # Root level

@@ -13,6 +13,7 @@ resource "aws_sqs_queue" "lambda_dlq" {
 
 # CloudWatch Log Group for Lambda function
 # checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${var.function_name}"
@@ -25,6 +26,8 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 
 # Lambda function for webhook handler (ZIP package)
 # checkov:skip=CKV_AWS_117:VPC not required - Lambda only accesses public AWS services (Secrets Manager, SQS, CloudWatch) and public APIs (GitHub API, Telegram API)
+# checkov:skip=CKV_AWS_173:No secrets in environment variables - all sensitive data stored in Secrets Manager
+# checkov:skip=CKV_AWS_272:Code signing not required - code deployed from controlled CI/CD pipeline
 resource "aws_lambda_function" "webhook_handler" {
   function_name    = var.function_name
   description      = "Lambda function for processing Telegram webhook requests and triggering GitHub Actions workflows"
@@ -33,6 +36,8 @@ resource "aws_lambda_function" "webhook_handler" {
   runtime          = "python3.11"
   filename         = var.lambda_zip_path
   source_code_hash = fileexists(var.lambda_zip_path) ? filebase64sha256(var.lambda_zip_path) : null
+
+  reserved_concurrent_executions = var.reserved_concurrent_executions
 
   timeout     = 30
   memory_size = 128

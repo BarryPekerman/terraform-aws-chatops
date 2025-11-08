@@ -29,6 +29,7 @@ resource "aws_sqs_queue" "lambda_dlq" {
 
 # CloudWatch log group for bot
 # checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "bot_logs" {
   name              = "/aws/lambda/${var.function_name}"
@@ -41,6 +42,8 @@ resource "aws_cloudwatch_log_group" "bot_logs" {
 
 # Lambda function for Telegram bot
 # checkov:skip=CKV_AWS_117:VPC not required - Lambda only accesses public AWS services (Secrets Manager, SQS, CloudWatch) and public APIs (Telegram Bot API)
+# checkov:skip=CKV_AWS_173:No secrets in environment variables - all sensitive data stored in Secrets Manager
+# checkov:skip=CKV_AWS_272:Code signing not required - code deployed from controlled CI/CD pipeline
 resource "aws_lambda_function" "telegram_bot" {
   function_name    = var.function_name
   description      = "Lambda function for sending messages to Telegram chat via Telegram Bot API"
@@ -68,6 +71,8 @@ resource "aws_lambda_function" "telegram_bot" {
   tracing_config {
     mode = "Active"
   }
+
+  reserved_concurrent_executions = var.reserved_concurrent_executions
 
   timeout     = 30
   memory_size = 128

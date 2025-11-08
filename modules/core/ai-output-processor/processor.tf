@@ -25,6 +25,7 @@ resource "aws_sqs_queue" "lambda_dlq" {
 
 # CloudWatch log group for output processor
 # checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "output_processor_logs" {
   name              = "/aws/lambda/${var.function_name}"
@@ -37,6 +38,8 @@ resource "aws_cloudwatch_log_group" "output_processor_logs" {
 
 # Output Processor Lambda Function
 # checkov:skip=CKV_AWS_117:VPC not required - Lambda only accesses public AWS services (Bedrock, SQS, CloudWatch) and public APIs
+# checkov:skip=CKV_AWS_173:No secrets in environment variables - all sensitive data stored in Secrets Manager
+# checkov:skip=CKV_AWS_272:Code signing not required - code deployed from controlled CI/CD pipeline
 resource "aws_lambda_function" "output_processor" {
   filename         = var.lambda_zip_path
   function_name    = var.function_name
@@ -47,6 +50,8 @@ resource "aws_lambda_function" "output_processor" {
   timeout          = 30
   memory_size      = 256
   source_code_hash = fileexists(var.lambda_zip_path) ? filebase64sha256(var.lambda_zip_path) : null
+
+  reserved_concurrent_executions = var.reserved_concurrent_executions
 
   environment {
     variables = merge(
