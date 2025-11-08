@@ -30,6 +30,11 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+
+  # Skip credential validation for plan-only runs (CI/CD)
+  # In production, remove these settings and use proper AWS credentials
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
 }
 
 module "chatops" {

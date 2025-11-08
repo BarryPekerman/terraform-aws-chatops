@@ -43,24 +43,10 @@ jobs:
           soft_fail: false
           output_format: sarif
           output_file_path: checkov.sarif
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Skip checks documented in ADR-0006 and CHECKOV_FINDINGS_ANALYSIS.md
-          # See .checkov.yaml for centralized suppression configuration
-          # CKV_AWS_149: KMS CMK encryption for Secrets Manager (intentionally using AWS-managed encryption)
-          # CKV_AWS_193: Automatic rotation for Secrets Manager (not required for static credentials)
-          # CKV2_AWS_57: Automatic rotation for Secrets Manager (not required for static credentials or project registry)
-          # CKV_AWS_158: CloudWatch Log Group KMS encryption (using AWS-managed encryption)
-          # CKV_AWS_26: SNS Topic encryption (using default SNS encryption)
-          # CKV_AWS_117: Lambda VPC configuration (not required - only public services)
-          # CKV_AWS_173: Lambda environment variable encryption (no secrets in env vars)
-          # CKV_AWS_272: Lambda code signing (code deployed from controlled CI/CD)
-          # CKV_AWS_338: CloudWatch log retention (7 days - documented decision)
-          # CKV_AWS_355: IAM policy wildcard resources (protected by tag-based conditions)
-          # CKV_AWS_287: IAM policy credentials exposure (read-only operations)
-          # CKV_AWS_290: IAM policy write access (protected by tag-based conditions)
-          # CKV2_AWS_29: API Gateway WAF protection (regional APIs protected by API keys)
-          # CKV_AWS_120: API Gateway caching (not applicable for Lambda-backed APIs)
-          skip_check: 'CKV_AWS_149,CKV_AWS_193,CKV2_AWS_57,CKV_AWS_158,CKV_AWS_26,CKV_AWS_117,CKV_AWS_173,CKV_AWS_272,CKV_AWS_338,CKV_AWS_355,CKV_AWS_287,CKV_AWS_290,CKV2_AWS_29,CKV_AWS_120'
+          github_pat: ${{ secrets.GITHUB_TOKEN }}
+          config_file: .checkov.yaml
+          # Skip checks are configured in .checkov.yaml
+          # See ADR-0006 and CHECKOV_FINDINGS_ANALYSIS.md for rationale
 
       - name: Upload Checkov results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v3
