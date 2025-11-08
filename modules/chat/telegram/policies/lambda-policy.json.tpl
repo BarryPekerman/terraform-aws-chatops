@@ -20,14 +20,6 @@
     {
       "Effect": "Allow",
       "Action": [
-        "kms:Decrypt",
-        "kms:DescribeKey"
-      ],
-      "Resource": "${kms_key_arn}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
         "sqs:SendMessage"
       ],
       "Resource": "${dlq_arn}"

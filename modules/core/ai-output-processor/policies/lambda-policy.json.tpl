@@ -25,14 +25,6 @@
     {
       "Effect": "Allow",
       "Action": [
-        "kms:Decrypt",
-        "kms:DescribeKey"
-      ],
-      "Resource": "${kms_key_arn}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
         "sqs:SendMessage"
       ],
       "Resource": "${dlq_arn}"
@@ -44,7 +36,14 @@
         "xray:PutTelemetryRecords"
       ],
       "Resource": "*"
-    }
+    }%{ if secrets_manager_arn != "" && secrets_manager_arn != null },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": "${secrets_manager_arn}"
+    }%{ endif }
   ]
 }
 
