@@ -12,6 +12,8 @@ resource "aws_sqs_queue" "lambda_dlq" {
 # Note: SQS queues don't support description fields
 
 # CloudWatch Log Group for Lambda function
+# checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
@@ -22,6 +24,7 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 # Note: CloudWatch log groups don't support description fields
 
 # Lambda function for webhook handler (ZIP package)
+# checkov:skip=CKV_AWS_117:VPC not required - Lambda only accesses public AWS services (Secrets Manager, SQS, CloudWatch) and public APIs (GitHub API, Telegram API)
 resource "aws_lambda_function" "webhook_handler" {
   function_name    = var.function_name
   description      = "Lambda function for processing Telegram webhook requests and triggering GitHub Actions workflows"

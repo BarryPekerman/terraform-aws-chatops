@@ -67,6 +67,8 @@ resource "aws_api_gateway_deployment" "output_processor_deployment" {
 }
 
 # CloudWatch log group for API Gateway access logs
+# checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   name              = "/aws/apigateway/${var.api_gateway_name}"
   retention_in_days = var.log_retention_days
@@ -76,6 +78,7 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
   tags = var.tags
 }
 
+# checkov:skip=CKV2_AWS_29:WAF not required for internal/regional API Gateway per security requirements
 resource "aws_api_gateway_stage" "output_processor_stage" {
   deployment_id = aws_api_gateway_deployment.output_processor_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.output_processor_api.id

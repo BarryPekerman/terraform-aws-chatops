@@ -41,16 +41,4 @@ variable "tags" {
   default     = {}
 }
 
-variable "resource_tag_key" {
-  description = "Tag key for ChatOps-managed resources"
-  type        = string
-  default     = "ChatOpsManaged"
-}
-
-variable "resource_tag_value" {
-  description = "Tag value for ChatOps-managed resources"
-  type        = string
-  default     = "true"
-}
-
 

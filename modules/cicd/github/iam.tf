@@ -84,3 +84,75 @@ resource "aws_iam_role_policy_attachment" "github_permissions_policy" {
 # See iam-terraform-permissions.tf for comprehensive Terraform permissions
 
 
+
+# EC2 Read-only permissions
+resource "aws_iam_policy" "github_ec2_readonly" {
+  name        = "${var.role_name}-ec2-readonly"
+  description = "Read-only EC2 permissions for Terraform plan"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Ec2ReadForPlan"
+        Effect = "Allow"
+        Action = [
+          "ec2:Describe*",
+          "ec2:Get*",
+          "ec2:List*"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "github_ec2_readonly" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.github_ec2_readonly.arn
+}
+
+# EC2 Destroy permissions
+resource "aws_iam_policy" "github_destroy_permissions" {
+  name        = "${var.role_name}-ec2-destroy"
+  description = "Permissions to destroy EC2/VPC resources"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "Ec2DestroyCore"
+        Effect = "Allow"
+        Action = [
+          "ec2:TerminateInstances",
+          "ec2:DeleteSecurityGroup",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:DeleteSubnet",
+          "ec2:DisassociateRouteTable",
+          "ec2:DeleteRoute",
+          "ec2:ReplaceRoute",
+          "ec2:DeleteRouteTable",
+          "ec2:DetachInternetGateway",
+          "ec2:DeleteInternetGateway",
+          "ec2:DeleteNetworkAcl",
+          "ec2:DeleteNetworkAclEntry",
+          "ec2:DeleteVpc",
+          "ec2:DeleteTags"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "github_destroy_permissions" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.github_destroy_permissions.arn
+}
+
+

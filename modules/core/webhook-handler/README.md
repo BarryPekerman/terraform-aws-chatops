@@ -78,7 +78,6 @@ module "webhook_handler" {
 | `lambda_duration_threshold` | Lambda duration alarm threshold (ms) | `number` | `25000` | no |
 | `large_payloads_threshold` | Large payloads alarm threshold (ms) | `number` | `5000` | no |
 | `api_throttling_threshold` | API throttling alarm threshold | `number` | `5` | no |
-| `allowed_cors_origins` | Allowed CORS origins | `list(string)` | `[]` | no |
 | `ai_processor_function_arn` | AI processor Lambda ARN (optional) | `string` | `null` | no |
 | `ai_threshold` | AI processing threshold (characters) | `number` | `5000` | no |
 | `additional_env_vars` | Additional environment variables | `map(string)` | `{}` | no |

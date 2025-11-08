@@ -117,11 +117,6 @@ variable "enable_security_alarms" {
   default     = false
 }
 
-variable "allowed_cors_origins" {
-  description = "Allowed CORS origins for API Gateway"
-  type        = list(string)
-  default     = []
-}
 
 variable "tags" {
   description = "Tags to apply to resources"

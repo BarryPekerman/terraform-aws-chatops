@@ -24,6 +24,8 @@ resource "aws_sqs_queue" "lambda_dlq" {
 # Note: SQS queues don't support description fields
 
 # CloudWatch log group for output processor
+# checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "output_processor_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
@@ -34,6 +36,7 @@ resource "aws_cloudwatch_log_group" "output_processor_logs" {
 # Note: CloudWatch log groups don't support description fields
 
 # Output Processor Lambda Function
+# checkov:skip=CKV_AWS_117:VPC not required - Lambda only accesses public AWS services (Bedrock, SQS, CloudWatch) and public APIs
 resource "aws_lambda_function" "output_processor" {
   filename         = var.lambda_zip_path
   function_name    = var.function_name
