@@ -1,6 +1,38 @@
 # ChatOps with Security Alarms Example
 # This example shows how to enable security monitoring and alarms
 
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+
+  # Backend Configuration (for production use)
+  # Uncomment and configure for remote state management with state locking:
+  #
+  # backend "s3" {
+  #   bucket         = "your-terraform-state-bucket"
+  #   key            = "chatops/with-security/terraform.tfstate"
+  #   region         = "us-east-1"
+  #   dynamodb_table = "terraform-state-lock"  # Required for state locking
+  #   encrypt        = true                    # Enable encryption at rest
+  # }
+  #
+  # Prerequisites:
+  # 1. Create S3 bucket for state storage (with versioning enabled)
+  # 2. Create DynamoDB table for state locking (partition key: LockID, type: String)
+  # 3. Ensure IAM permissions for S3 and DynamoDB access
+  #
+  # For local development, leave this commented out (uses local state)
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
 module "chatops" {
   source = "../../"
 
@@ -19,7 +51,7 @@ module "chatops" {
 
   max_message_length = var.max_message_length
   log_retention_days = var.log_retention_days
-  
+
   # 🔒 SECURITY: Enable security alarms and enhanced logging
   enable_security_alarms = true
 

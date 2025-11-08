@@ -8,6 +8,24 @@ terraform {
       version = "~> 6.0"
     }
   }
+
+  # Backend Configuration (for production use)
+  # Uncomment and configure for remote state management with state locking:
+  #
+  # backend "s3" {
+  #   bucket         = "your-terraform-state-bucket"
+  #   key            = "chatops/basic/terraform.tfstate"
+  #   region         = "us-east-1"
+  #   dynamodb_table = "terraform-state-lock"  # Required for state locking
+  #   encrypt        = true                    # Enable encryption at rest
+  # }
+  #
+  # Prerequisites:
+  # 1. Create S3 bucket for state storage (with versioning enabled)
+  # 2. Create DynamoDB table for state locking (partition key: LockID, type: String)
+  # 3. Ensure IAM permissions for S3 and DynamoDB access
+  #
+  # For local development, leave this commented out (uses local state)
 }
 
 provider "aws" {
@@ -30,8 +48,8 @@ module "chatops" {
   telegram_lambda_zip_path     = var.telegram_lambda_zip_path
   ai_processor_lambda_zip_path = var.ai_processor_lambda_zip_path
 
-  max_message_length = var.max_message_length
-  log_retention_days = var.log_retention_days
+  max_message_length     = var.max_message_length
+  log_retention_days     = var.log_retention_days
   enable_security_alarms = var.enable_security_alarms
 
   tags = {
