@@ -1,0 +1,23 @@
+# Example Terraform variables file for ChatOps with Security Alarms
+# Copy this to terraform.tfvars and fill in your values
+
+aws_region         = "us-east-1"
+name_prefix        = "chatops-secure"
+github_owner       = "your-github-org"
+github_repo        = "your-repo"
+github_branch      = "main"
+github_token       = "ghp_your_github_token"
+telegram_bot_token = "123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"
+authorized_chat_id = "123456789"
+s3_bucket_arn      = "arn:aws:s3:::your-terraform-state-bucket"
+
+webhook_lambda_zip_path      = "lambda_function.zip"
+telegram_lambda_zip_path     = "telegram-bot.zip"
+ai_processor_lambda_zip_path = "output_processor.zip"
+
+max_message_length = 3500
+log_retention_days = 7
+
+# Note: enable_security_alarms is set to true in main.tf
+# This example enables CloudWatch security alarms and enhanced logging
+
