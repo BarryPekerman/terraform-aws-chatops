@@ -1,6 +1,13 @@
 # Deny everything by default
 *
 
+# Explicitly deny test artifacts and state files
+*.tfstate
+*.tfstate.backup
+*.tfplan
+*.zip
+tfsec
+
 # Allow specific files explicitly (no wildcards or shell expansion)
 
 # Root level
@@ -21,6 +28,8 @@
 !.github/workflows/ci.yml
 !.github/workflows/security-audit.yml
 !.github/workflows/terraform-plan.yml
+!.github/workflows/integration-tests.yml
+!.github/workflows/terratest.yml
 
 # Examples - basic
 !examples
