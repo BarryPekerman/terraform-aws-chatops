@@ -30,17 +30,29 @@ variable "github_token" {
   description = "GitHub personal access token"
   type        = string
   sensitive   = true
+  validation {
+    condition     = can(regex("^(ghp_|gho_|ghu_|ghs_|ghr_)", var.github_token))
+    error_message = "GitHub token must start with ghp_, gho_, ghu_, ghs_, or ghr_."
+  }
 }
 
 variable "telegram_bot_token" {
   description = "Telegram bot token"
   type        = string
   sensitive   = true
+  validation {
+    condition     = can(regex("^[0-9]+:[A-Za-z0-9_-]+$", var.telegram_bot_token))
+    error_message = "Telegram bot token must be in format: <bot_id>:<token> (e.g., 123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11)."
+  }
 }
 
 variable "authorized_chat_id" {
   description = "Authorized Telegram chat ID"
   type        = string
+  validation {
+    condition     = can(regex("^-?[0-9]+$", var.authorized_chat_id))
+    error_message = "Chat ID must be a numeric string (can be negative for groups)."
+  }
 }
 
 variable "s3_bucket_arn" {
@@ -70,6 +82,10 @@ variable "max_message_length" {
   description = "Maximum message length for base webhook handler"
   type        = number
   default     = 3500
+  validation {
+    condition     = var.max_message_length > 0 && var.max_message_length <= 4096
+    error_message = "Max message length must be between 1 and 4096 characters (Telegram limit)."
+  }
 }
 
 variable "enable_ai_processing" {
@@ -88,6 +104,10 @@ variable "ai_threshold" {
   description = "Threshold for triggering AI processing"
   type        = number
   default     = 3500
+  validation {
+    condition     = var.ai_threshold > 0 && var.ai_threshold <= 100000
+    error_message = "AI threshold must be between 1 and 100000 characters."
+  }
 }
 
 variable "ai_model_id" {
@@ -100,6 +120,10 @@ variable "log_retention_days" {
   description = "CloudWatch log retention in days"
   type        = number
   default     = 7
+  validation {
+    condition     = var.log_retention_days >= 1 && var.log_retention_days <= 3653
+    error_message = "Log retention must be between 1 and 3653 days."
+  }
 }
 
 variable "enable_security_alarms" {
