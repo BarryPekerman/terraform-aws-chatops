@@ -184,6 +184,7 @@ resource "aws_api_gateway_stage" "webhook_stage" {
 
 # API Gateway method settings for execution logging
 # checkov:skip=CKV2_AWS_4:Logging level configured via method_settings resource
+# checkov:skip=CKV_AWS_225:Caching not applicable for Lambda-backed APIs with dynamic content (webhooks require real-time processing, no caching)
 resource "aws_api_gateway_method_settings" "webhook_settings" {
   rest_api_id = aws_api_gateway_rest_api.webhook_api.id
   stage_name  = aws_api_gateway_stage.webhook_stage.stage_name
