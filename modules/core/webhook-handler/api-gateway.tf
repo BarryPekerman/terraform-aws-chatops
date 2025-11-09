@@ -163,13 +163,6 @@ resource "aws_api_gateway_stage" "webhook_stage" {
 
   xray_tracing_enabled = var.enable_xray_tracing
 
-  # Execution logging configuration
-  method_settings {
-    resource_path = "/*/*"
-    http_method   = "*"
-    logging_level = "INFO"
-  }
-
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
     format = jsonencode({

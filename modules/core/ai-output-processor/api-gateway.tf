@@ -94,13 +94,6 @@ resource "aws_api_gateway_stage" "output_processor_stage" {
 
   xray_tracing_enabled = true
 
-  # Execution logging configuration
-  method_settings {
-    resource_path = "/*/*"
-    http_method   = "*"
-    logging_level = "INFO"
-  }
-
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
     format = jsonencode({
