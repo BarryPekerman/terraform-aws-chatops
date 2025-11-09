@@ -17,6 +17,7 @@ tfsec
 !.gitignore
 !LICENSE
 !README.md
+!.pre-commit-config.yaml
 
 # Root Terraform files
 !main.tf

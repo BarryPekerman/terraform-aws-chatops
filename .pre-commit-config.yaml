@@ -1,0 +1,93 @@
+# Pre-commit hooks configuration for ChatOps Terraform Module
+# 
+# Local Setup:
+# 1. Install pre-commit: pip install pre-commit
+# 2. Install hooks: pre-commit install
+# 3. Run manually: pre-commit run --all-files
+#
+# For detailed setup instructions and troubleshooting, see docs/DEVELOPMENT.md
+#
+# Troubleshooting: If Git asks for GitHub credentials when installing hooks:
+#   Option 1: Use credential helper (doesn't affect SSH pushes):
+#     git config --global credential.helper store
+#     # Then enter credentials once, they'll be cached
+#   
+#   Option 2: Configure HTTPS only for pre-commit (local to this repo):
+#     git config url.'https://github.com/'.insteadOf 'git@github.com:'
+#     # This only affects this repo, not your global Git config
+#   
+#   Option 3: Use SSH keys for GitHub (if you already have them set up)
+#     # Pre-commit will use your existing SSH keys
+#   
+# Note: The hooks download from public GitHub repos and shouldn't need
+# authentication. If you're prompted, it's likely a Git configuration issue.
+
+repos:
+  # Terraform formatting (lightweight hooks)
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.86.0
+    hooks:
+      - id: terraform_fmt
+        args: ['--args=--recursive']
+      # Skip heavy hooks for now - run these in CI instead
+      # - id: terraform_validate
+      # - id: terraform_tflint
+      # - id: terraform_tfsec
+      # - id: terraform_checkov
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: detect-private-key
+
+  # Secret detection (optional - can be slow on first run)
+  # - repo: https://github.com/Yelp/detect-secrets
+  #   rev: v1.4.0
+  #   hooks:
+  #     - id: detect-secrets
+  #       args: ['--baseline', '.secrets.baseline']
+  #       exclude: package.lock.json
+
+  # Go formatting (for Terratest)
+  - repo: https://github.com/pre-commit/mirrors-gofmt
+    rev: v0.7.0
+    hooks:
+      - id: gofmt
+        files: ^tests/.*\.go$
+
+  # Python formatting (for Lambda tests)
+  - repo: https://github.com/psf/black
+    rev: v0.23.12.1
+    hooks:
+      - id: black
+        files: ^tests/lambda/.*\.py$
+        args: ['--line-length=100']
+
+  # Python linting
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.0.0
+    hooks:
+      - id: flake8
+        files: ^tests/lambda/.*\.py$
+        args: ['--max-line-length=100', '--extend-ignore=E203,W503']
+
+  # Custom hook to validate Lambda ZIP files exist
+  - repo: local
+    hooks:
+      - id: validate-lambda-zips
+        name: Validate Lambda ZIP files
+        entry: bash
+        args: ['-c', 'if [ -f terraform.tfvars ]; then for path in webhook_lambda_zip_path telegram_lambda_zip_path ai_processor_lambda_zip_path; do zip=$(grep "^${path}" terraform.tfvars | cut -d= -f2 | tr -d " " | tr -d \"); if [ -n "$zip" ] && [ ! -f "$zip" ]; then echo "Missing Lambda ZIP file: $zip"; exit 1; fi; done; fi']
+        language: system
+        pass_filenames: false
+        always_run: false
+
