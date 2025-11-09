@@ -24,9 +24,9 @@ variable "secrets_manager_arn" {
 }
 
 variable "log_retention_days" {
-  description = "CloudWatch log retention in days"
+  description = "CloudWatch log retention in days (default: 7 for cost optimization)"
   type        = number
-  default     = 365
+  default     = 7
 }
 
 variable "additional_env_vars" {
@@ -39,6 +39,12 @@ variable "enable_security_alarms" {
   description = "Enable CloudWatch security alarms and enhanced logging"
   type        = bool
   default     = false
+}
+
+variable "reserved_concurrent_executions" {
+  description = "Reserved concurrent executions for Lambda function (prevents runaway costs)"
+  type        = number
+  default     = 10
 }
 
 variable "tags" {

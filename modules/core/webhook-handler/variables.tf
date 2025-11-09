@@ -33,6 +33,24 @@ variable "secrets_manager_arn" {
   type        = string
 }
 
+variable "project_registry_secret_arn" {
+  description = "ARN of the project registry secret"
+  type        = string
+  default     = null
+}
+
+variable "ai_processor_function_arn" {
+  description = "ARN of the AI processor Lambda function (optional)"
+  type        = string
+  default     = null
+}
+
+variable "ai_threshold" {
+  description = "Output length threshold for AI processing (default: 5000 characters)"
+  type        = number
+  default     = 5000
+}
+
 variable "max_message_length" {
   description = "Maximum length of messages (will be truncated if longer)"
   type        = number
@@ -46,9 +64,9 @@ variable "stage_name" {
 }
 
 variable "log_retention_days" {
-  description = "CloudWatch log retention in days"
+  description = "CloudWatch log retention in days (default: 7 for cost optimization)"
   type        = number
-  default     = 365
+  default     = 7
 }
 
 variable "enable_xray_tracing" {
@@ -97,6 +115,12 @@ variable "enable_security_alarms" {
   description = "Enable CloudWatch security alarms and enhanced logging"
   type        = bool
   default     = false
+}
+
+variable "reserved_concurrent_executions" {
+  description = "Reserved concurrent executions for Lambda function (prevents runaway costs)"
+  type        = number
+  default     = 10
 }
 
 variable "tags" {

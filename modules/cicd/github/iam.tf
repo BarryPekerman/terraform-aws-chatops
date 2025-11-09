@@ -46,7 +46,10 @@ resource "aws_iam_policy" "github_permissions_policy" {
         Action = [
           "secretsmanager:GetSecretValue"
         ]
-        Resource = var.secrets_manager_arn
+        Resource = compact([
+          var.secrets_manager_arn,
+          var.project_registry_secret_arn
+        ])
       },
       {
         Sid    = "TfStateBucketAccess"
@@ -77,7 +80,14 @@ resource "aws_iam_role_policy_attachment" "github_permissions_policy" {
   policy_arn = aws_iam_policy.github_permissions_policy.arn
 }
 
+# Note: EC2 read-only and destroy permissions are now part of the terraform-permissions policy
+# See iam-terraform-permissions.tf for comprehensive Terraform permissions
+
+
+
 # EC2 Read-only permissions
+# checkov:skip=CKV_AWS_355:Read-only operations are safe - Terraform plan needs broad read access
+# checkov:skip=CKV_AWS_287:Read-only EC2 actions do not expose credentials
 resource "aws_iam_policy" "github_ec2_readonly" {
   name        = "${var.role_name}-ec2-readonly"
   description = "Read-only EC2 permissions for Terraform plan"
@@ -107,6 +117,8 @@ resource "aws_iam_role_policy_attachment" "github_ec2_readonly" {
 }
 
 # EC2 Destroy permissions
+# checkov:skip=CKV_AWS_355:Protected by tag-based conditions - only tagged resources can be destroyed (see iam-policies.tf)
+# checkov:skip=CKV_AWS_290:Protected by tag-based conditions - only tagged resources can be destroyed (see iam-policies.tf)
 resource "aws_iam_policy" "github_destroy_permissions" {
   name        = "${var.role_name}-ec2-destroy"
   description = "Permissions to destroy EC2/VPC resources"

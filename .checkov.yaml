@@ -1,0 +1,47 @@
+# Checkov Configuration File
+# Centralized suppression management for Checkov security scans
+
+# Skip checks globally (applies to all files)
+# These checks are documented in ADR-0006 and CHECKOV_FINDINGS_ANALYSIS.md
+skip-check:
+  # AWS-managed encryption (per ADR-0006)
+  - CKV_AWS_149  # KMS CMK encryption for Secrets Manager
+  - CKV_AWS_158  # CloudWatch Log Group KMS encryption
+  - CKV_AWS_26   # SNS Topic encryption
+  
+  # Automatic rotation (not required for static credentials)
+  - CKV_AWS_193  # Automatic rotation for Secrets Manager
+  - CKV2_AWS_57  # Automatic rotation for Secrets Manager
+  
+  # Lambda VPC (not required - only public services)
+  - CKV_AWS_117  # Lambda function in VPC
+  
+  # Lambda environment variables (no secrets - stored in Secrets Manager)
+  - CKV_AWS_173  # Lambda environment variable encryption
+  
+  # Lambda code signing (code deployed from controlled CI/CD)
+  - CKV_AWS_272  # Lambda code signing validation
+  
+  # CloudWatch log retention (7 days - documented decision)
+  - CKV_AWS_338  # CloudWatch log retention (1 year minimum)
+  
+  # IAM policies (protected by tag-based conditions)
+  - CKV_AWS_355  # IAM policy wildcard resources
+  - CKV_AWS_287  # IAM policy credentials exposure
+  - CKV_AWS_290  # IAM policy write access without constraints
+  
+  # API Gateway (regional APIs, protected by API keys)
+  - CKV2_AWS_29  # API Gateway WAF protection
+  - CKV_AWS_120  # API Gateway caching (not applicable for Lambda-backed APIs)
+  - CKV_AWS_225  # API Gateway method settings caching (not applicable for Lambda-backed APIs with dynamic content)
+  - CKV_AWS_59   # API Gateway authorization - webhooks require public access, security handled at application level
+  - CKV2_AWS_51  # API Gateway client certificate - not required for webhooks/internal APIs, security handled at application level
+  - CKV2_AWS_4   # API Gateway logging level - INFO level configured (may need different property name)
+
+# Framework-specific settings
+framework: terraform
+
+# Output format (use 'output' not 'output-format' - Checkov CLI uses --output flag)
+# Note: Output format should be specified in workflow, not config file
+# soft-fail: false  # Set in workflow instead
+

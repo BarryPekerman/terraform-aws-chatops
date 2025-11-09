@@ -1,12 +1,23 @@
 # Deny everything by default
 *
 
+# Explicitly deny test artifacts and state files
+*.tfstate
+*.tfstate.backup
+*.tfplan
+*.zip
+tfsec
+
+# Allow Checkov configuration file
+!.checkov.yaml
+
 # Allow specific files explicitly (no wildcards or shell expansion)
 
 # Root level
 !.gitignore
 !LICENSE
 !README.md
+!.pre-commit-config.yaml
 
 # Root Terraform files
 !main.tf
@@ -20,7 +31,8 @@
 !.github/workflows
 !.github/workflows/ci.yml
 !.github/workflows/security-audit.yml
-!.github/workflows/terraform-plan.yml
+!.github/workflows/integration-tests.yml
+!.github/workflows/terratest.yml
 
 # Examples - basic
 !examples
@@ -60,6 +72,8 @@
 !modules/cicd
 !modules/cicd/github
 !modules/cicd/github/iam.tf
+!modules/cicd/github/iam-policies.tf
+!modules/cicd/github/iam-terraform-permissions.tf
 !modules/cicd/github/oidc.tf
 !modules/cicd/github/outputs.tf
 !modules/cicd/github/variables.tf
@@ -78,6 +92,7 @@
 !modules/core/webhook-handler/lambda.tf
 !modules/core/webhook-handler/outputs.tf
 !modules/core/webhook-handler/variables.tf
+!modules/core/webhook-handler/versions.tf
 !modules/core/webhook-handler/security.tf
 !modules/core/webhook-handler/policies
 !modules/core/webhook-handler/policies/assume-role-policy.json
@@ -100,3 +115,11 @@
 !modules/core/security/main.tf
 !modules/core/security/variables.tf
 !modules/core/security/outputs.tf
+# Modules - core/monitoring
+!modules/core/monitoring
+!modules/core/monitoring/main.tf
+!modules/core/monitoring/variables.tf
+!modules/core/monitoring/outputs.tf
+!modules/core/monitoring/dashboard.tf
+!modules/core/monitoring/README.md
+

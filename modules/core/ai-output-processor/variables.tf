@@ -34,7 +34,7 @@ variable "ai_threshold" {
 variable "ai_model_id" {
   description = "AWS Bedrock model ID for AI processing"
   type        = string
-  default     = "anthropic.claude-3-haiku-20240307-v1:0"
+  default     = "amazon.titan-text-express-v1"
 }
 
 variable "ai_max_tokens" {
@@ -50,9 +50,9 @@ variable "stage_name" {
 }
 
 variable "log_retention_days" {
-  description = "CloudWatch log retention in days"
+  description = "CloudWatch log retention in days (default: 7 for cost optimization)"
   type        = number
-  default     = 365
+  default     = 7
 }
 
 variable "api_key_required" {
@@ -71,6 +71,18 @@ variable "enable_security_alarms" {
   description = "Enable CloudWatch security alarms and enhanced logging"
   type        = bool
   default     = false
+}
+
+variable "secrets_manager_arn" {
+  description = "ARN of Secrets Manager secret for Telegram bot token"
+  type        = string
+  default     = null
+}
+
+variable "reserved_concurrent_executions" {
+  description = "Reserved concurrent executions for Lambda function (prevents runaway costs)"
+  type        = number
+  default     = 10
 }
 
 variable "tags" {

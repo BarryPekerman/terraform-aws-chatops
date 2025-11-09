@@ -1,6 +1,7 @@
 # IAM role for bot Lambda
 resource "aws_iam_role" "bot_role" {
-  name = "${var.function_name}-role"
+  name        = "${var.function_name}-role"
+  description = "IAM role for ${var.function_name} Lambda function to access Secrets Manager and send messages to DLQ"
 
   assume_role_policy = file("${path.module}/policies/assume-role-policy.json")
 
@@ -9,13 +10,13 @@ resource "aws_iam_role" "bot_role" {
 
 # IAM policy for bot Lambda
 resource "aws_iam_policy" "bot_policy" {
-  name = "${var.function_name}-policy"
+  name        = "${var.function_name}-policy"
+  description = "IAM policy for ${var.function_name} Lambda function to access Secrets Manager and send messages to DLQ"
 
   policy = templatefile("${path.module}/policies/lambda-policy.json.tpl", {
     region              = data.aws_region.current.id
     account_id          = data.aws_caller_identity.current.account_id
     secrets_manager_arn = var.secrets_manager_arn
-    kms_key_arn         = aws_kms_key.lambda_env_key.arn
     dlq_arn             = aws_sqs_queue.lambda_dlq.arn
   })
 

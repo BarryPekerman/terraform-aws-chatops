@@ -16,15 +16,16 @@
         "secretsmanager:GetSecretValue"
       ],
       "Resource": "${secrets_manager_arn}"
-    },
+    }%{ if project_registry_secret_arn != "" && project_registry_secret_arn != null },
     {
       "Effect": "Allow",
       "Action": [
-        "kms:Decrypt",
-        "kms:DescribeKey"
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:PutSecretValue",
+        "secretsmanager:UpdateSecret"
       ],
-      "Resource": "${kms_key_arn}"
-    },
+      "Resource": "${project_registry_secret_arn}"
+    }%{ endif },
     {
       "Effect": "Allow",
       "Action": [
@@ -39,7 +40,14 @@
         "xray:PutTelemetryRecords"
       ],
       "Resource": "*"
-    }
+    }%{ if ai_processor_function_arn != "" && ai_processor_function_arn != null },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "lambda:InvokeFunction"
+      ],
+      "Resource": "${ai_processor_function_arn}"
+    }%{ endif }
   ]
 }
 

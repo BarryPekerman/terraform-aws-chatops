@@ -2,9 +2,12 @@
 # This module provides security alarms and logging for any Lambda function
 
 # SNS Topic for security alerts
+# checkov:skip=CKV_AWS_26:Using default SNS encryption per ADR-0006 (no KMS keys)
+# trivy:ignore:AVD-AWS-0095 Using default SNS encryption per ADR-0006 (cost optimization, no KMS keys)
+# trivy:ignore:AVD-AWS-0136 Using default SNS encryption per ADR-0006 (cost optimization, no KMS keys)
 resource "aws_sns_topic" "security_alerts" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   name = "${var.function_name}-security-alerts"
   tags = var.tags
 }
@@ -12,7 +15,7 @@ resource "aws_sns_topic" "security_alerts" {
 # SNS Topic Policy for CloudWatch to publish alerts
 resource "aws_sns_topic_policy" "security_alerts_policy" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   arn = aws_sns_topic.security_alerts[0].arn
 
   policy = jsonencode({
@@ -23,7 +26,7 @@ resource "aws_sns_topic_policy" "security_alerts_policy" {
         Principal = {
           Service = "cloudwatch.amazonaws.com"
         }
-        Action = "SNS:Publish"
+        Action   = "SNS:Publish"
         Resource = aws_sns_topic.security_alerts[0].arn
       }
     ]
@@ -31,12 +34,15 @@ resource "aws_sns_topic_policy" "security_alerts_policy" {
 }
 
 # Security-focused CloudWatch log group
+# checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
+# trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "security_logs" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   name              = "/aws/chatops/security/${var.function_name}"
   retention_in_days = 7
-  
+
   tags = merge(var.tags, {
     Purpose = "Security"
     LogType = "SecurityEvents"
@@ -44,12 +50,15 @@ resource "aws_cloudwatch_log_group" "security_logs" {
 }
 
 # Enhanced API Gateway access logging
+# checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
+# trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 resource "aws_cloudwatch_log_group" "enhanced_api_logs" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   name              = "/aws/apigateway/security/${var.api_gateway_name}"
   retention_in_days = 7
-  
+
   tags = merge(var.tags, {
     Purpose = "Security"
     LogType = "APIGatewaySecurity"
@@ -59,7 +68,7 @@ resource "aws_cloudwatch_log_group" "enhanced_api_logs" {
 # Alarm: High request rate (potential DDoS)
 resource "aws_cloudwatch_metric_alarm" "high_request_rate" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   alarm_name          = "${var.function_name}-high-request-rate"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
@@ -70,7 +79,7 @@ resource "aws_cloudwatch_metric_alarm" "high_request_rate" {
   threshold           = "50"
   alarm_description   = "High request rate detected on webhook endpoint"
   alarm_actions       = [aws_sns_topic.security_alerts[0].arn]
-  
+
   dimensions = {
     ApiName = var.api_gateway_name
     Stage   = var.stage_name
@@ -82,7 +91,7 @@ resource "aws_cloudwatch_metric_alarm" "high_request_rate" {
 # Alarm: High error rate (potential attack)
 resource "aws_cloudwatch_metric_alarm" "high_error_rate" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   alarm_name          = "${var.function_name}-high-error-rate"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
@@ -92,8 +101,8 @@ resource "aws_cloudwatch_metric_alarm" "high_error_rate" {
   statistic           = "Sum"
   threshold           = "10"
   alarm_description   = "High error rate detected on webhook endpoint"
-  alarm_actions          = [aws_sns_topic.security_alerts[0].arn]
-  
+  alarm_actions       = [aws_sns_topic.security_alerts[0].arn]
+
   dimensions = {
     ApiName = var.api_gateway_name
     Stage   = var.stage_name
@@ -105,7 +114,7 @@ resource "aws_cloudwatch_metric_alarm" "high_error_rate" {
 # Alarm: Lambda function errors
 resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   alarm_name          = "${var.function_name}-lambda-errors"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
@@ -116,7 +125,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
   threshold           = "5"
   alarm_description   = "High Lambda error rate detected"
   alarm_actions       = [aws_sns_topic.security_alerts[0].arn]
-  
+
   dimensions = {
     FunctionName = var.function_name
   }
@@ -127,7 +136,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_errors" {
 # Alarm: Lambda duration (potential timeout attacks)
 resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   alarm_name          = "${var.function_name}-lambda-duration"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
@@ -138,7 +147,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
   threshold           = "25000"
   alarm_description   = "Lambda function taking too long to execute"
   alarm_actions       = [aws_sns_topic.security_alerts[0].arn]
-  
+
   dimensions = {
     FunctionName = var.function_name
   }
@@ -149,7 +158,7 @@ resource "aws_cloudwatch_metric_alarm" "lambda_duration" {
 # Alarm: Unusual request patterns (large payloads)
 resource "aws_cloudwatch_metric_alarm" "large_payloads" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   alarm_name          = "${var.function_name}-large-payloads"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
@@ -160,7 +169,7 @@ resource "aws_cloudwatch_metric_alarm" "large_payloads" {
   threshold           = "5000"
   alarm_description   = "Large payloads or slow processing detected"
   alarm_actions       = [aws_sns_topic.security_alerts[0].arn]
-  
+
   dimensions = {
     ApiName = var.api_gateway_name
     Stage   = var.stage_name
@@ -172,7 +181,7 @@ resource "aws_cloudwatch_metric_alarm" "large_payloads" {
 # Alarm: API Gateway throttling
 resource "aws_cloudwatch_metric_alarm" "api_throttling" {
   count = var.enable_security_alarms ? 1 : 0
-  
+
   alarm_name          = "${var.function_name}-api-throttling"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "1"
@@ -183,7 +192,7 @@ resource "aws_cloudwatch_metric_alarm" "api_throttling" {
   threshold           = "5"
   alarm_description   = "API Gateway throttling detected"
   alarm_actions       = [aws_sns_topic.security_alerts[0].arn]
-  
+
   dimensions = {
     ApiName = var.api_gateway_name
     Stage   = var.stage_name
