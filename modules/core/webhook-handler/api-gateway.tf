@@ -30,6 +30,7 @@ resource "aws_api_gateway_request_validator" "webhook_validator" {
 }
 
 # API Gateway method (POST)
+# checkov:skip=CKV_AWS_59:Webhook endpoint must be publicly accessible for Telegram/GitHub. Security handled at application level (Lambda validates bot token and chat ID).
 resource "aws_api_gateway_method" "webhook_post" {
   rest_api_id      = aws_api_gateway_rest_api.webhook_api.id
   resource_id      = aws_api_gateway_resource.webhook.id
@@ -154,12 +155,20 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
 # checkov:skip=CKV2_AWS_29:WAF not required for internal/regional API Gateway per security requirements
 # checkov:skip=CKV_AWS_76:Access logging enabled via access_log_settings
 # checkov:skip=CKV_AWS_120:Caching not applicable for Lambda-backed APIs with dynamic content
+# checkov:skip=CKV2_AWS_51:Client certificate authentication not required - webhooks require public access. Security handled at application level (Lambda validates bot token and chat ID).
 resource "aws_api_gateway_stage" "webhook_stage" {
   deployment_id = aws_api_gateway_deployment.webhook_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.webhook_api.id
   stage_name    = var.stage_name
 
   xray_tracing_enabled = var.enable_xray_tracing
+
+  # Execution logging configuration
+  method_settings {
+    resource_path = "/*/*"
+    http_method   = "*"
+    logging_level = "INFO"
+  }
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn

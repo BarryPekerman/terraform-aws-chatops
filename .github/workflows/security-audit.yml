@@ -33,22 +33,24 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: .
-          framework: terraform
-          soft_fail: false
-          output_format: sarif
-          output_file_path: checkov.sarif
-          github_pat: ${{ secrets.GITHUB_TOKEN }}
-          # Skip checks are configured in .checkov.yaml (auto-detected)
-          # See ADR-0006 and CHECKOV_FINDINGS_ANALYSIS.md for rationale
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/workdir" \
+            -w /workdir \
+            ghcr.io/bridgecrewio/checkov:3.2.490 \
+            -d . \
+            -o sarif \
+            --output-file-path checkov.sarif \
+            --framework terraform \
+            --skip-results-upload
+        # Skip checks are configured via inline suppressions in code
+        # See ADR-0006, ADR-0007, and CHECKOV_FINDINGS_ANALYSIS.md for rationale
 
       - name: Upload Checkov results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4.31.2
         if: always()
         with:
           sarif_file: checkov.sarif
@@ -59,10 +61,10 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
 
       - name: Run Trivy vulnerability scanner in IaC mode
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           scan-type: 'config'
           scan-ref: '.'
@@ -74,7 +76,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4.31.2
         if: always()
         with:
           sarif_file: trivy.sarif
@@ -85,12 +87,12 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
         with:
           fetch-depth: 0
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6.0.0
         with:
           python-version: '3.11'
 
@@ -121,12 +123,12 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5.0.0
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v3.1.2
         with:
-          terraform_version: 1.6.0
+          terraform_version: 1.13.5
 
       - name: Check for outdated providers
         run: |

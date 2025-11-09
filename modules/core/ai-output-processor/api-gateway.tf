@@ -86,12 +86,20 @@ resource "aws_cloudwatch_log_group" "api_gateway_logs" {
 # checkov:skip=CKV2_AWS_29:WAF not required for internal/regional API Gateway per security requirements
 # checkov:skip=CKV_AWS_76:Access logging enabled via access_log_settings
 # checkov:skip=CKV_AWS_120:Caching not applicable for Lambda-backed APIs with dynamic content
+# checkov:skip=CKV2_AWS_51:Client certificate authentication not required - internal API protected by API keys. Security handled at application level.
 resource "aws_api_gateway_stage" "output_processor_stage" {
   deployment_id = aws_api_gateway_deployment.output_processor_deployment.id
   rest_api_id   = aws_api_gateway_rest_api.output_processor_api.id
   stage_name    = var.stage_name
 
   xray_tracing_enabled = true
+
+  # Execution logging configuration
+  method_settings {
+    resource_path = "/*/*"
+    http_method   = "*"
+    logging_level = "INFO"
+  }
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway_logs.arn
