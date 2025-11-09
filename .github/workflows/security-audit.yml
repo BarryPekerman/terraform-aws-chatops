@@ -44,8 +44,7 @@ jobs:
           output_format: sarif
           output_file_path: checkov.sarif
           github_pat: ${{ secrets.GITHUB_TOKEN }}
-          config_file: .checkov.yaml
-          # Skip checks are configured in .checkov.yaml
+          # Skip checks are configured in .checkov.yaml (auto-detected)
           # See ADR-0006 and CHECKOV_FINDINGS_ANALYSIS.md for rationale
 
       - name: Upload Checkov results to GitHub Security tab

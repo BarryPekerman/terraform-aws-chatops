@@ -3,7 +3,7 @@
 
 # Skip checks globally (applies to all files)
 # These checks are documented in ADR-0006 and CHECKOV_FINDINGS_ANALYSIS.md
-skip_check:
+skip-check:
   # AWS-managed encryption (per ADR-0006)
   - CKV_AWS_149  # KMS CMK encryption for Secrets Manager
   - CKV_AWS_158  # CloudWatch Log Group KMS encryption
@@ -38,8 +38,8 @@ skip_check:
 framework: terraform
 
 # Output format
-output_format: sarif
+output-format: sarif
 
 # Soft fail (set to false to fail on findings)
-soft_fail: false
+soft-fail: false
 
