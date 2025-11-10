@@ -137,6 +137,192 @@ module "chatops" {
 
 See [examples/with-security/](examples/with-security/) for detailed security configuration.
 
+## Cost Breakdown
+
+### Monthly Cost Estimates
+
+The ChatOps module has minimal infrastructure costs. Here's a breakdown by configuration:
+
+| Configuration | Monthly Cost | Components |
+|---------------|--------------|------------|
+| **Basic** (no AI, no security) | ~$6.80 | Lambda, API Gateway, Secrets Manager, CloudWatch Logs |
+| **With AI** | ~$7.80 | Basic + AI processor Lambda + Bedrock usage |
+| **With Security** | ~$9.80 | Basic + Security alarms + SNS + Enhanced logging |
+| **Full** (AI + Security) | ~$10.80 | All features enabled |
+
+### Cost Components
+
+#### Base Infrastructure (All Configurations)
+- **Lambda Functions** (2 functions):
+  - Invocations: First 1M requests/month free, then $0.20 per 1M requests
+  - Compute: $0.0000166667 per GB-second
+  - Estimated: ~$2.00/month (10K invocations/month, 256MB memory, 500ms average)
+- **API Gateway**:
+  - Requests: First 1M requests/month free, then $3.50 per 1M requests
+  - Estimated: ~$0.50/month (10K requests/month)
+- **Secrets Manager**:
+  - Secrets: $0.40 per secret per month
+  - API Calls: $0.05 per 10,000 calls
+  - Estimated: ~$1.20/month (2 secrets, 10K API calls/month)
+- **CloudWatch Logs**:
+  - Ingestion: $0.50 per GB
+  - Storage: $0.03 per GB/month
+  - Estimated: ~$1.00/month (7-day retention, ~1GB logs/month)
+- **SQS Dead Letter Queue**:
+  - Requests: First 1M requests/month free, then $0.40 per 1M requests
+  - Estimated: ~$0.10/month (minimal usage)
+- **Total Base**: ~$6.80/month
+
+#### AI Processing (Optional)
+- **AI Processor Lambda**:
+  - Invocations: ~$1.00/month (10K invocations/month)
+  - **AWS Bedrock** (Amazon Titan Text Express):
+    - Input tokens: $0.0002 per 1K tokens
+    - Output tokens: $0.0003 per 1K tokens
+    - Estimated: ~$0.50/month (5K input tokens, 1K output tokens per invocation, 10K invocations/month)
+- **Total AI**: ~$1.50/month
+
+#### Security Monitoring (Optional)
+- **SNS Notifications**:
+  - First 1M notifications/month free, then $0.50 per 1M notifications
+  - Estimated: ~$0.50/month (minimal usage)
+- **CloudWatch Alarms**:
+  - $0.10 per alarm per month
+  - Estimated: ~$0.60/month (6 alarms)
+- **Enhanced Logging**:
+  - Additional log retention and ingestion
+  - Estimated: ~$0.50/month
+- **Total Security**: ~$1.60/month
+
+### Cost Optimization Tips
+
+1. **Log Retention**: Default 7-day retention is cost-effective. Increase only if needed.
+2. **Lambda Memory**: Use minimum memory (128MB) unless performance requires more.
+3. **Lambda Timeout**: Set appropriate timeout (30s default) to avoid unnecessary compute time.
+4. **API Gateway Caching**: Not applicable for Lambda-backed APIs (webhooks require real-time processing).
+5. **Reserved Concurrency**: Default 10 reserved concurrent executions prevents runaway costs.
+6. **AI Processing**: Disable AI processing if not needed to save ~$1.50/month.
+7. **Security Alarms**: Disable security alarms if not needed to save ~$1.60/month.
+
+### Detailed Cost Analysis
+
+For detailed cost breakdowns, pricing calculations, and cost optimization strategies, see [Cost Analysis Documentation](docs/COST_ANALYSIS.md).
+
+## Network Architecture (VPC)
+
+### Why VPC is Not Required
+
+The ChatOps module does **not** use VPC configuration for Lambda functions. This is intentional and cost-effective:
+
+#### 1. Public AWS Services Access
+- Lambda functions access **public AWS services**:
+  - Secrets Manager (public endpoint)
+  - SQS (public endpoint)
+  - CloudWatch Logs (public endpoint)
+  - AWS Bedrock (public endpoint)
+- These services are accessible from the internet and don't require VPC endpoints.
+
+#### 2. Public API Access
+- Lambda functions access **public APIs**:
+  - GitHub API (public internet)
+  - Telegram Bot API (public internet)
+- These APIs are accessible from the internet and don't require VPC configuration.
+
+#### 3. Cost Considerations
+- **VPC Configuration Costs**:
+  - NAT Gateway: ~$32/month + data transfer costs
+  - VPC Endpoints: ~$7/month per endpoint + data transfer costs
+  - Additional complexity and maintenance
+- **Without VPC**: No additional network costs, simpler architecture
+
+#### 4. Security Considerations
+- **API Gateway Security**: API Gateway handles public access and authentication
+- **API Key Authentication**: Optional API key authentication provides additional security
+- **IAM Policies**: Least-privilege IAM policies restrict Lambda access
+- **Secrets Manager**: Credentials stored securely in Secrets Manager
+
+#### 5. When VPC Might Be Needed
+- **Private Resources**: If Lambda needs to access private resources (RDS, ElastiCache, etc.)
+- **Compliance Requirements**: If compliance mandates VPC configuration
+- **Network Isolation**: If network isolation is required for security
+
+**Note**: If VPC is required, users can add VPC configuration in their own Terraform configuration. The module doesn't prevent VPC usage, but doesn't configure it by default.
+
+### Network Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    Internet                               │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          │ HTTPS
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│              API Gateway (Public)                        │
+│  - Request validation                                   │
+│  - API key authentication (optional)                    │
+│  - Rate limiting                                        │
+└─────────────────────────────────────────────────────────┘
+                          │
+                          │ Invoke
+                          ▼
+┌─────────────────────────────────────────────────────────┐
+│         Lambda Functions (No VPC)                        │
+│  ┌──────────────────┐  ┌──────────────────┐           │
+│  │ Webhook Handler  │  │ Telegram Bot     │           │
+│  └──────────────────┘  └──────────────────┘           │
+│                          │                               │
+│                          ▼                               │
+│                  ┌──────────────────┐                    │
+│                  │ AI Processor     │                    │
+│                  └──────────────────┘                    │
+└─────────────────────────────────────────────────────────┘
+         │              │              │              │
+         │              │              │              │
+         ▼              ▼              ▼              ▼
+┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+│   Secrets   │ │     SQS     │ │ CloudWatch  │ │   Bedrock   │
+│   Manager   │ │     DLQ     │ │    Logs     │ │     AI      │
+│  (Public)   │ │  (Public)   │ │  (Public)   │ │  (Public)   │
+└─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘
+         │              │              │              │
+         │              │              │              │
+         ▼              ▼              ▼              ▼
+┌─────────────────────────────────────────────────────────┐
+│              Public Internet APIs                        │
+│  - GitHub API                                           │
+│  - Telegram Bot API                                     │
+└─────────────────────────────────────────────────────────┘
+```
+
+**Key Points:**
+- All Lambda functions access public AWS services (no VPC needed)
+- All Lambda functions access public internet APIs (no VPC needed)
+- API Gateway handles public access and authentication
+- No NAT Gateway or VPC endpoints required
+- Simpler architecture, lower cost
+
+## Retry Behavior and Error Handling
+
+**Important:** Retry logic is implemented in the Lambda code (separate repository), not in Terraform. The module provides infrastructure (DLQ, IAM permissions) for retry handling.
+
+### Recommended Retry Patterns
+
+- **GitHub API Calls**: Exponential backoff, retry on rate limits (429) and server errors (5XX)
+- **Telegram API Calls**: Exponential backoff, retry on rate limits (429) and server errors (5XX)
+- **Secrets Manager**: Retry with exponential backoff for transient failures
+- **Dead Letter Queue**: Failed invocations are sent to DLQ after Lambda retries are exhausted
+
+### Lambda Code Repository
+
+The actual retry logic implementation should be in the Lambda code repository. This module only provides the infrastructure for retry handling.
+
+**Reference Implementation:**
+- Lambda code repository: [chatops-state-manager](https://github.com/BarryPekerman/chatops-state-manager)
+- See Lambda code for actual retry implementation
+
+For more details, see [Development Documentation](docs/DEVELOPMENT.md#retry-behavior-and-error-handling).
+
 ## Requirements
 
 | Name | Version |

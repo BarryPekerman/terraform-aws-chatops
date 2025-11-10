@@ -79,6 +79,63 @@ module "github" {
 7. **Read-Only Access**: Provides read-only access to EC2, S3, Secrets Manager, and state bucket
 8. **Terraform State Access**: Provides read/write access to S3 bucket and Secrets Manager for Terraform state management
 
+## Security Considerations
+
+### Tag-Based Resource Permissions Risk
+
+**⚠️ Important Security Warning:** The GitHub Actions IAM role has **full access** (read, write, delete) to all AWS resources tagged with `ChatOpsManaged=true` (or your configured tag key/value).
+
+**Security Risks:**
+- **Tag Collision**: If the tag is too common or misused, resources could be accidentally managed or destroyed
+- **Unauthorized Access**: If an attacker gains access to GitHub Actions, they could modify or destroy tagged resources
+- **Cross-Environment Access**: If the same tag is used across environments, resources could be accessed from unintended environments
+
+**Mitigation Strategies:**
+
+1. **Use Unique Tag Keys/Values Per Environment**
+   ```hcl
+   # Production
+   resource_tag_key   = "ChatOpsManaged-Prod"
+   resource_tag_value = "true"
+   
+   # Staging
+   resource_tag_key   = "ChatOpsManaged-Staging"
+   resource_tag_value = "true"
+   ```
+
+2. **Use Environment-Specific Tag Filtering**
+   ```hcl
+   environment_tag_key   = "Environment"
+   environment_tag_value  = "production"  # Only manage production resources
+   ```
+
+3. **Restrict Tag Usage**
+   - Only tag resources that should be managed by ChatOps
+   - Use AWS Config to enforce tagging policies
+   - Monitor untagged resources via CloudWatch
+
+4. **Review IAM Policies Regularly**
+   - Audit IAM policies for over-permissive access
+   - Use CloudTrail to monitor resource access
+   - Set up alarms for unusual activity
+
+5. **Use Separate Roles Per Environment**
+   - Create separate IAM roles for each environment
+   - Use different tag keys/values per environment
+   - Restrict branch access per environment
+
+**Best Practices:**
+- ✅ Use unique, environment-specific tag keys/values
+- ✅ Enable environment tag filtering for multi-environment setups
+- ✅ Regularly audit tagged resources
+- ✅ Monitor CloudTrail for unauthorized access
+- ✅ Use AWS Config to enforce tagging policies
+- ❌ Don't use generic tag keys/values across environments
+- ❌ Don't tag resources you don't want managed by ChatOps
+- ❌ Don't share the same tag across production and non-production environments
+
+For more details, see [Security Documentation](../../docs/SECURITY.md).
+
 ## Example: With Custom Tags
 
 ```hcl
