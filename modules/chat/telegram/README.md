@@ -35,6 +35,22 @@ module "telegram_bot" {
 }
 ```
 
+## Lambda ZIP File Requirements
+
+**Important:** The Lambda ZIP file must exist before running `terraform apply`. There is no fallback behavior - if the ZIP file doesn't exist, Terraform will fail.
+
+**Current Behavior:**
+- `lambda_zip_path` must point to an existing ZIP file
+- `fileexists()` check only affects `source_code_hash` (sets to null if file doesn't exist)
+- Terraform will fail if the ZIP file doesn't exist when creating the Lambda function
+- No conditional creation - Lambda function is always created if module is used
+
+**Best Practices:**
+- Build Lambda ZIP files before running Terraform
+- Use CI/CD to build and package Lambda functions
+- Store ZIP files in a consistent location (e.g., `../lambda/` directory)
+- Document ZIP file build process in your project README
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |

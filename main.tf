@@ -142,7 +142,3 @@ module "monitoring" {
   ]
 }
 
-# Note: Callback URL is updated via AWS CLI after initial apply
-# This avoids circular dependencies during initial infrastructure creation
-# Run: aws secretsmanager put-secret-value --secret-id <secret-arn> --secret-string <merged-json>
-

@@ -47,6 +47,34 @@ module "webhook_handler" {
 }
 ```
 
+## Lambda ZIP File Requirements
+
+**Important:** The Lambda ZIP file must exist before running `terraform apply`. There is no fallback behavior - if the ZIP file doesn't exist, Terraform will fail.
+
+**Current Behavior:**
+- `lambda_zip_path` must point to an existing ZIP file
+- `fileexists()` check only affects `source_code_hash` (sets to null if file doesn't exist)
+- Terraform will fail if the ZIP file doesn't exist when creating the Lambda function
+- No conditional creation - Lambda function is always created if module is used
+
+**Best Practices:**
+- Build Lambda ZIP files before running Terraform
+- Use CI/CD to build and package Lambda functions
+- Store ZIP files in a consistent location (e.g., `../lambda/` directory)
+- Document ZIP file build process in your project README
+
+**Example Build Process:**
+```bash
+# Build Lambda function
+cd lambda/webhook-handler
+pip install -r requirements.txt -t .
+zip -r ../../webhook-handler.zip .
+
+# Then run Terraform
+cd ../../terraform
+terraform apply
+```
+
 ## Inputs
 
 | Name | Description | Type | Default | Required |
@@ -114,6 +142,44 @@ module "webhook_handler" {
 5. **Security Alarms**: When enabled, creates CloudWatch alarms for DDoS detection, error monitoring, and anomaly detection
 6. **DLQ**: Failed Lambda invocations are sent to SQS DLQ for manual inspection and retry
 7. **CORS**: Disabled by default (not needed for Telegram webhooks). Enable only if web dashboard integration is planned
+
+## Retry Behavior and Error Handling
+
+**Important:** Retry logic is implemented in the Lambda code (separate repository), not in Terraform. This module provides the infrastructure (DLQ, IAM permissions) for retry handling.
+
+### Recommended Retry Patterns
+
+The Lambda code should implement the following retry patterns:
+
+#### GitHub API Calls
+- Use exponential backoff for GitHub API calls
+- Retry on rate limit errors (429) with appropriate delay
+- Retry on transient errors (5XX) with exponential backoff
+- Don't retry on client errors (4XX) except for rate limits
+- Maximum retry attempts: 3-5 retries
+
+#### Dead Letter Queue (DLQ)
+- Failed invocations are sent to DLQ after Lambda retries are exhausted
+- DLQ retention: 4 days (AWS default)
+- DLQ encryption: AWS-managed encryption (SQS-managed SSE)
+- Monitor DLQ for failed invocations
+- Process DLQ messages manually or with a separate Lambda function
+
+#### Secrets Manager Failures
+- No graceful degradation if Secrets Manager is unavailable
+- Lambda will fail if Secrets Manager is unavailable
+- Implement retry logic for Secrets Manager API calls
+- Use exponential backoff for Secrets Manager failures
+
+### Lambda Code Repository
+
+The actual retry logic implementation should be in the Lambda code repository. This module only provides the infrastructure for retry handling.
+
+**Reference Implementation:**
+- Lambda code repository: [chatops-state-manager](https://github.com/BarryPekerman/chatops-state-manager)
+- See Lambda code for actual retry implementation
+
+For more details, see [Development Documentation](../../../docs/DEVELOPMENT.md#retry-behavior-and-error-handling).
 
 ## Example: With Security Alarms
 
