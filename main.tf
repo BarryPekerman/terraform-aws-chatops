@@ -1,4 +1,4 @@
-# ChatOps Terraform Module v1.0
+# ChatOps Terraform Module v0.1.0
 # Root module orchestrating core, CI/CD, and chat integrations
 
 # Core Secrets Module
