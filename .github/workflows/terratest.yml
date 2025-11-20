@@ -1,0 +1,107 @@
+name: Terratest Infrastructure Validation
+
+# Infrastructure validation tests using Terratest
+# Tests deploy actual AWS resources to validate infrastructure provisioning
+# Note: Uses dummy Lambda ZIPs - only validates infrastructure, not Lambda functionality
+
+on:
+  workflow_dispatch:  # Manual trigger only
+    inputs:
+      test_example:
+        description: 'Example to test (basic, with-ai, with-security, or all)'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - basic
+          - with-ai
+          - with-security
+      aws_region:
+        description: 'AWS region for testing'
+        required: true
+        default: 'us-east-1'
+        type: string
+
+permissions:
+  contents: read
+  id-token: write  # Required for OIDC
+  pull-requests: write
+
+env:
+  SKIP_TERRATEST: false
+
+jobs:
+  terratest:
+    name: Terratest Infrastructure Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45  # Tests take 20-30 minutes
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+          cache-dependency-path: tests/terraform/go.mod
+      
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+          role-to-assume: ${{ secrets.AWS_TERRATEST_ROLE_ARN }}
+          role-session-name: terratest-session-${{ github.run_id }}
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.5
+      
+      - name: Install Terratest dependencies
+        run: |
+          cd tests/terraform
+          go mod download
+      
+      - name: Run Terratest - Basic Example
+        if: ${{ github.event.inputs.test_example == 'all' || github.event.inputs.test_example == 'basic' }}
+        run: |
+          cd tests/terraform
+          go test -v -timeout 30m -run TestBasicExample
+        env:
+          AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+      
+      - name: Run Terratest - With AI Example
+        if: ${{ github.event.inputs.test_example == 'all' || github.event.inputs.test_example == 'with-ai' }}
+        run: |
+          cd tests/terraform
+          go test -v -timeout 30m -run TestWithAIExample
+        env:
+          AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+      
+      - name: Run Terratest - With Security Example
+        if: ${{ github.event.inputs.test_example == 'all' || github.event.inputs.test_example == 'with-security' }}
+        run: |
+          cd tests/terraform
+          go test -v -timeout 30m -run TestWithSecurityExample
+        env:
+          AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+      
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Terratest Infrastructure Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Tests validate infrastructure provisioning only" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Lambda functionality not tested (uses dummy ZIPs)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** These tests validate that:" >> $GITHUB_STEP_SUMMARY
+          echo "- Resources are created correctly" >> $GITHUB_STEP_SUMMARY
+          echo "- IAM roles and policies are correct" >> $GITHUB_STEP_SUMMARY
+          echo "- API Gateway is configured correctly" >> $GITHUB_STEP_SUMMARY
+          echo "- Outputs are correct" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For Lambda functionality testing, see the Lambda code repository." >> $GITHUB_STEP_SUMMARY
+
+

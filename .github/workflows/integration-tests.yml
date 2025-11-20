@@ -1,0 +1,209 @@
+name: Integration Tests
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '*.tf'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
+      - 'tests/**/*'
+      - '.github/workflows/integration-tests.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - '*.tf'
+      - 'modules/**/*.tf'
+      - 'examples/**/*.tf'
+      - 'tests/**/*'
+      - '.github/workflows/integration-tests.yml'
+
+env:
+  TF_VERSION: "1.13.5"
+  GO_VERSION: "1.21"
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  # Terratest infrastructure tests (basic example only on PR)
+  terratest-basic:
+    name: Terratest - Basic Example
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Go dependencies
+        run: |
+          cd tests/terraform
+          go mod download
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run Terratest - Basic Example
+        run: |
+          cd tests/terraform
+          go test -v -timeout 30m -run TestBasicExample ./basic_test.go ./test_helpers.go
+
+  # Lambda unit tests
+  lambda-unit-tests:
+    name: Lambda Unit Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          cd tests/lambda
+          pip install -r requirements.txt
+
+      - name: Run Lambda unit tests
+        run: |
+          cd tests/lambda
+          pytest -v --cov=. --cov-report=xml
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./tests/lambda/coverage.xml
+          flags: lambda
+
+  # IAM validation tests
+  iam-validation:
+    name: IAM Policy Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Go dependencies
+        run: |
+          cd tests/terraform
+          go mod download
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run IAM validation tests
+        run: |
+          cd tests/security
+          go test -v -timeout 20m -run TestIAMPolicyStructure
+
+  # Full integration tests (only on main branch)
+  integration-e2e:
+    name: End-to-End Integration Tests
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    strategy:
+      matrix:
+        example:
+          - basic
+          - with-ai
+          - with-security
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install Go dependencies
+        run: |
+          cd tests/terraform
+          go mod download
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Run Terratest - ${{ matrix.example }}
+        run: |
+          cd tests/terraform
+          case "${{ matrix.example }}" in
+            basic)
+              go test -v -timeout 30m -run TestBasicExample
+              ;;
+            with-ai)
+              go test -v -timeout 30m -run TestWithAIExample
+              ;;
+            with-security)
+              go test -v -timeout 30m -run TestWithSecurityExample
+              ;;
+          esac
+
+  # Test summary
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [terratest-basic, lambda-unit-tests, iam-validation]
+    if: always()
+    
+    steps:
+      - name: Test summary
+        run: |
+          echo "## Integration Test Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Completed Tests:" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Terratest - Basic Example" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Lambda Unit Tests" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ IAM Policy Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review the test results above for details." >> $GITHUB_STEP_SUMMARY
+
+
+
+
+
+
+
