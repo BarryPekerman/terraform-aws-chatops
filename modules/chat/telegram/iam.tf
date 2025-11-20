@@ -11,13 +11,49 @@ resource "aws_iam_role" "bot_role" {
 # IAM policy for bot Lambda
 resource "aws_iam_policy" "bot_policy" {
   name        = "${var.function_name}-policy"
-  description = "IAM policy for ${var.function_name} Lambda function to access Secrets Manager and send messages to DLQ"
+  description = "IAM policy for ${var.function_name} Lambda function to access Secrets Manager${var.enable_dlq ? " and send messages to DLQ" : ""}"
 
-  policy = templatefile("${path.module}/policies/lambda-policy.json.tpl", {
-    region              = data.aws_region.current.id
-    account_id          = data.aws_caller_identity.current.account_id
-    secrets_manager_arn = var.secrets_manager_arn
-    dlq_arn             = var.enable_dlq ? aws_sqs_queue.lambda_dlq[0].arn : null
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat(
+      [
+        {
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ]
+          Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*:*"
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "secretsmanager:GetSecretValue"
+          ]
+          Resource = var.secrets_manager_arn
+        }
+      ],
+      var.enable_dlq ? [
+        {
+          Effect = "Allow"
+          Action = [
+            "sqs:SendMessage"
+          ]
+          Resource = aws_sqs_queue.lambda_dlq[0].arn
+        }
+      ] : [],
+      [
+        {
+          Effect = "Allow"
+          Action = [
+            "xray:PutTraceSegments",
+            "xray:PutTelemetryRecords"
+          ]
+          Resource = "*"
+        }
+      ]
+    )
   })
 
   tags = var.tags
