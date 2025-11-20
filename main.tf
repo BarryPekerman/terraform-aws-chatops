@@ -32,6 +32,8 @@ module "core_webhook" {
   stage_name             = var.api_gateway_stage
   log_retention_days     = var.log_retention_days
   enable_xray_tracing    = var.enable_xray_tracing
+  enable_kms_encryption  = true
+  enable_dlq             = true
   rate_limit             = var.rate_limit
   burst_limit            = var.burst_limit
   quota_limit            = var.quota_limit
@@ -74,6 +76,8 @@ module "telegram" {
   authorized_chat_id     = var.authorized_chat_id
   secrets_manager_arn    = module.core_secrets.secret_arn
   log_retention_days     = var.log_retention_days
+  enable_kms_encryption  = true
+  enable_dlq             = true
   additional_env_vars    = var.telegram_additional_env_vars
   enable_security_alarms = var.enable_security_alarms
 

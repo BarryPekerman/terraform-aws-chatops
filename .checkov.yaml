@@ -8,28 +8,28 @@ skip-check:
   - CKV_AWS_149  # KMS CMK encryption for Secrets Manager
   - CKV_AWS_158  # CloudWatch Log Group KMS encryption
   - CKV_AWS_26   # SNS Topic encryption
-  
+
   # Automatic rotation (not required for static credentials)
   - CKV_AWS_193  # Automatic rotation for Secrets Manager
   - CKV2_AWS_57  # Automatic rotation for Secrets Manager
-  
+
   # Lambda VPC (not required - only public services)
   - CKV_AWS_117  # Lambda function in VPC
-  
+
   # Lambda environment variables (no secrets - stored in Secrets Manager)
   - CKV_AWS_173  # Lambda environment variable encryption
-  
+
   # Lambda code signing (code deployed from controlled CI/CD)
   - CKV_AWS_272  # Lambda code signing validation
-  
+
   # CloudWatch log retention (7 days - documented decision)
   - CKV_AWS_338  # CloudWatch log retention (1 year minimum)
-  
+
   # IAM policies (protected by tag-based conditions)
   - CKV_AWS_355  # IAM policy wildcard resources
   - CKV_AWS_287  # IAM policy credentials exposure
   - CKV_AWS_290  # IAM policy write access without constraints
-  
+
   # API Gateway (regional APIs, protected by API keys)
   - CKV2_AWS_29  # API Gateway WAF protection
   - CKV_AWS_120  # API Gateway caching (not applicable for Lambda-backed APIs)

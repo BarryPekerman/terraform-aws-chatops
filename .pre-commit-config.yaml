@@ -1,5 +1,5 @@
 # Pre-commit hooks configuration for ChatOps Terraform Module
-# 
+#
 # Local Setup:
 # 1. Install pre-commit: pip install pre-commit
 # 2. Install hooks: pre-commit install
@@ -11,14 +11,14 @@
 #   Option 1: Use credential helper (doesn't affect SSH pushes):
 #     git config --global credential.helper store
 #     # Then enter credentials once, they'll be cached
-#   
+#
 #   Option 2: Configure HTTPS only for pre-commit (local to this repo):
 #     git config url.'https://github.com/'.insteadOf 'git@github.com:'
 #     # This only affects this repo, not your global Git config
-#   
+#
 #   Option 3: Use SSH keys for GitHub (if you already have them set up)
 #     # Pre-commit will use your existing SSH keys
-#   
+#
 # Note: The hooks download from public GitHub repos and shouldn't need
 # authentication. If you're prompted, it's likely a Git configuration issue.
 

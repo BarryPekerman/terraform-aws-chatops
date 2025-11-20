@@ -31,8 +31,6 @@ tfsec
 !.github/workflows
 !.github/workflows/ci.yml
 !.github/workflows/security-audit.yml
-!.github/workflows/integration-tests.yml
-!.github/workflows/terratest.yml
 
 # Examples - basic
 !examples
@@ -122,4 +120,5 @@ tfsec
 !modules/core/monitoring/outputs.tf
 !modules/core/monitoring/dashboard.tf
 !modules/core/monitoring/README.md
+
 

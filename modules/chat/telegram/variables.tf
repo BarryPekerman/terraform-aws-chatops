@@ -29,6 +29,18 @@ variable "log_retention_days" {
   default     = 7
 }
 
+variable "enable_kms_encryption" {
+  description = "Enable KMS encryption for Lambda environment variables and CloudWatch logs"
+  type        = bool
+  default     = true
+}
+
+variable "enable_dlq" {
+  description = "Enable Dead Letter Queue for Lambda function"
+  type        = bool
+  default     = true
+}
+
 variable "additional_env_vars" {
   description = "Additional environment variables for the bot Lambda"
   type        = map(string)

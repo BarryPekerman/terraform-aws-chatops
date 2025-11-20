@@ -5,7 +5,7 @@ data "aws_region" "current" {}
 # IAM role for Lambda function
 resource "aws_iam_role" "lambda_role" {
   name        = "${var.function_name}-role"
-  description = "IAM role for ${var.function_name} Lambda function to access Secrets Manager, invoke other Lambdas, and send messages to DLQ"
+  description = "IAM role for ${var.function_name} Lambda function to access Secrets Manager, invoke other Lambdas${var.enable_dlq ? ", and send messages to DLQ" : ""}"
 
   assume_role_policy = file("${path.module}/policies/assume-role-policy.json")
 
@@ -15,15 +15,61 @@ resource "aws_iam_role" "lambda_role" {
 # IAM policy for Lambda to write logs and access secrets
 resource "aws_iam_policy" "lambda_policy" {
   name        = "${var.function_name}-policy"
-  description = "Policy for ${var.function_name} Lambda function"
+  description = "Policy for ${var.function_name} Lambda function${var.enable_dlq ? " with DLQ support" : ""}"
 
-  policy = templatefile("${path.module}/policies/lambda-policy.json.tpl", {
-    region                      = data.aws_region.current.id
-    account_id                  = data.aws_caller_identity.current.account_id
-    secrets_manager_arn         = var.secrets_manager_arn
-    project_registry_secret_arn = var.project_registry_secret_arn != null ? var.project_registry_secret_arn : ""
-    ai_processor_function_arn   = var.ai_processor_function_arn != null && var.ai_processor_function_arn != "" ? var.ai_processor_function_arn : ""
-    dlq_arn                     = aws_sqs_queue.lambda_dlq.arn
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = concat(
+      [
+        {
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ]
+          Resource = "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/*:*"
+        },
+        {
+          Effect = "Allow"
+          Action = [
+            "secretsmanager:GetSecretValue"
+          ]
+          Resource = [
+            var.secrets_manager_arn,
+            var.project_registry_secret_arn != null && var.project_registry_secret_arn != "" ? var.project_registry_secret_arn : null
+          ]
+        }
+      ],
+      var.ai_processor_function_arn != null && var.ai_processor_function_arn != "" ? [
+        {
+          Effect = "Allow"
+          Action = [
+            "lambda:InvokeFunction"
+          ]
+          Resource = var.ai_processor_function_arn
+        }
+      ] : [],
+      var.enable_dlq ? [
+        {
+          Effect = "Allow"
+          Action = [
+            "sqs:SendMessage"
+          ]
+          Resource = aws_sqs_queue.lambda_dlq[0].arn
+        }
+      ] : [],
+      [
+        {
+          Effect = "Allow"
+          Action = [
+            "xray:PutTraceSegments",
+            "xray:PutTelemetryRecords"
+          ]
+          Resource = "*"
+        }
+      ]
+    )
   })
 
   tags = var.tags
