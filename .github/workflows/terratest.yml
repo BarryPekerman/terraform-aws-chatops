@@ -36,34 +36,34 @@ jobs:
     name: Terratest Infrastructure Validation
     runs-on: ubuntu-latest
     timeout-minutes: 45  # Tests take 20-30 minutes
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.21'
           cache-dependency-path: tests/terraform/go.mod
-      
+
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ github.event.inputs.aws_region || 'us-east-1' }}
           role-to-assume: ${{ secrets.AWS_TERRATEST_ROLE_ARN }}
           role-session-name: terratest-session-${{ github.run_id }}
-      
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.13.5
-      
+
       - name: Install Terratest dependencies
         run: |
           cd tests/terraform
           go mod download
-      
+
       - name: Run Terratest - Basic Example
         if: ${{ github.event.inputs.test_example == 'all' || github.event.inputs.test_example == 'basic' }}
         run: |
@@ -71,7 +71,7 @@ jobs:
           go test -v -timeout 30m -run TestBasicExample
         env:
           AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
-      
+
       - name: Run Terratest - With AI Example
         if: ${{ github.event.inputs.test_example == 'all' || github.event.inputs.test_example == 'with-ai' }}
         run: |
@@ -79,7 +79,7 @@ jobs:
           go test -v -timeout 30m -run TestWithAIExample
         env:
           AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
-      
+
       - name: Run Terratest - With Security Example
         if: ${{ github.event.inputs.test_example == 'all' || github.event.inputs.test_example == 'with-security' }}
         run: |
@@ -87,7 +87,7 @@ jobs:
           go test -v -timeout 30m -run TestWithSecurityExample
         env:
           AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
-      
+
       - name: Test Summary
         if: always()
         run: |
