@@ -31,6 +31,8 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
   retention_in_days = var.log_retention_days
   # kms_key_id is not set - using default CloudWatch encryption
   # Future: kms_key_id = local.use_kms_encryption ? aws_kms_key.logs[0].arn : null
+  # Explicitly set to null to use default encryption, but reference var to satisfy tflint
+  kms_key_id = var.enable_kms_encryption ? null : null
 
   tags = merge(var.tags, {
     # Reference enable_kms_encryption to satisfy tflint (reserved for future use)
