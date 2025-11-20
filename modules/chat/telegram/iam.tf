@@ -17,7 +17,7 @@ resource "aws_iam_policy" "bot_policy" {
     region              = data.aws_region.current.id
     account_id          = data.aws_caller_identity.current.account_id
     secrets_manager_arn = var.secrets_manager_arn
-    dlq_arn             = aws_sqs_queue.lambda_dlq.arn
+    dlq_arn             = var.enable_dlq ? aws_sqs_queue.lambda_dlq[0].arn : null
   })
 
   tags = var.tags
