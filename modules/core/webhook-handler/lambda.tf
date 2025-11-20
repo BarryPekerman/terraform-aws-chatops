@@ -1,5 +1,6 @@
 # SQS Dead Letter Queue for failed Lambda invocations
 resource "aws_sqs_queue" "lambda_dlq" {
+  count                   = var.enable_dlq ? 1 : 0
   name                    = "${var.function_name}-dlq"
   sqs_managed_sse_enabled = true # AWS-managed encryption (free, secure)
 
@@ -15,9 +16,12 @@ resource "aws_sqs_queue" "lambda_dlq" {
 # checkov:skip=CKV_AWS_158:Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 # checkov:skip=CKV_AWS_338:7 days retention is cost-effective and sufficient for operational debugging (documented decision)
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
+# Note: enable_kms_encryption variable is reserved for future KMS encryption support
+# Currently using default CloudWatch encryption (AWS-managed keys)
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
+  # kms_key_id = var.enable_kms_encryption ? aws_kms_key.logs[0].arn : null  # Future: implement KMS encryption
 
   tags = var.tags
 }
@@ -57,8 +61,11 @@ resource "aws_lambda_function" "webhook_handler" {
     )
   }
 
-  dead_letter_config {
-    target_arn = aws_sqs_queue.lambda_dlq.arn
+  dynamic "dead_letter_config" {
+    for_each = var.enable_dlq ? [1] : []
+    content {
+      target_arn = aws_sqs_queue.lambda_dlq[0].arn
+    }
   }
 
   tracing_config {
