@@ -123,3 +123,20 @@ tfsec
 !modules/core/monitoring/dashboard.tf
 !modules/core/monitoring/README.md
 
+# Tests directory
+!tests
+!tests/README.md
+!tests/terraform
+!tests/terraform/go.mod
+!tests/terraform/*.go
+!tests/terraform/test_helpers.go
+!tests/security
+!tests/security/*.go
+!tests/integration
+!tests/integration/*.go
+!tests/lambda
+!tests/lambda/requirements.txt
+!tests/lambda/conftest.py
+!tests/lambda/**/*.py
+!tests/*.tftest.hcl
+
