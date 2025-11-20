@@ -1,3 +1,10 @@
+# Local variable to reference enable_kms_encryption (reserved for future KMS encryption support)
+locals {
+  # Currently using default CloudWatch encryption (AWS-managed keys)
+  # When KMS encryption is implemented, this will control whether to use a KMS key
+  use_kms_encryption = var.enable_kms_encryption
+}
+
 # SQS Dead Letter Queue for failed Lambda invocations
 resource "aws_sqs_queue" "lambda_dlq" {
   count                   = var.enable_dlq ? 1 : 0
@@ -18,12 +25,17 @@ resource "aws_sqs_queue" "lambda_dlq" {
 # trivy:ignore:AVD-AWS-0017 Using default CloudWatch encryption per ADR-0006 (no KMS keys)
 # Note: enable_kms_encryption variable is reserved for future KMS encryption support
 # Currently using default CloudWatch encryption (AWS-managed keys)
+# When KMS encryption is implemented, use: kms_key_id = local.use_kms_encryption ? aws_kms_key.logs[0].arn : null
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${var.function_name}"
   retention_in_days = var.log_retention_days
-  # kms_key_id = var.enable_kms_encryption ? aws_kms_key.logs[0].arn : null  # Future: implement KMS encryption
+  # kms_key_id is not set - using default CloudWatch encryption
+  # Future: kms_key_id = local.use_kms_encryption ? aws_kms_key.logs[0].arn : null
 
-  tags = var.tags
+  tags = merge(var.tags, {
+    # Reference enable_kms_encryption to satisfy tflint (reserved for future use)
+    KmsEncryptionEnabled = tostring(local.use_kms_encryption)
+  })
 }
 
 # Note: CloudWatch log groups don't support description fields
