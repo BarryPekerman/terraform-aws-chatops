@@ -75,6 +75,18 @@ variable "enable_xray_tracing" {
   default     = true
 }
 
+variable "enable_kms_encryption" {
+  description = "Enable KMS encryption for Lambda environment variables and CloudWatch logs"
+  type        = bool
+  default     = true
+}
+
+variable "enable_dlq" {
+  description = "Enable Dead Letter Queue for Lambda function"
+  type        = bool
+  default     = true
+}
+
 variable "rate_limit" {
   description = "API Gateway rate limit (requests per second)"
   type        = number

@@ -1,4 +1,4 @@
-# ChatOps Terraform Module v0.1.0
+# ChatOps Terraform Module v0.1.3
 
 A Terraform module for building ChatOps workflows on AWS. This module enables you to manage infrastructure through Telegram with secure GitHub Actions integration.
 
@@ -6,7 +6,7 @@ A Terraform module for building ChatOps workflows on AWS. This module enables yo
  
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         ChatOps v0.1.0                            │
+│                         ChatOps v0.1.3                            │
 │                                                                 │
 │  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐         │
 │  │    Core      │   │    CI/CD     │   │     Chat     │         │
@@ -388,7 +388,7 @@ For more details, see [Development Documentation](docs/DEVELOPMENT.md#retry-beha
 
 ## Platform Support
 
-### Telegram (v0.1.0)
+### Telegram (v0.1.3)
 
 - ✅ Bot integration
 - ✅ Webhook handler
