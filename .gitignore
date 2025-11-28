@@ -121,4 +121,18 @@ tfsec
 !modules/core/monitoring/dashboard.tf
 !modules/core/monitoring/README.md
 
+<<<<<<< HEAD
+=======
+# Tests directory (excluding terratest and integration tests)
+!tests
+!tests/README.md
+!tests/security
+!tests/security/*.go
+!tests/lambda
+!tests/lambda/requirements.txt
+!tests/lambda/conftest.py
+!tests/lambda/**/*.py
+!tests/secrets_test.tftest.hcl
+!tests/webhook_handler_test.tftest.hcl
+>>>>>>> b9d2590 (Remove terratest and integration tests only)
 
